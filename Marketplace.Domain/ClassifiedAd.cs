@@ -2,30 +2,14 @@ namespace Marketplace.Domain
 {
   public class ClassifiedAd
   {
-    public Guid Id { get; init; }
-    private Guid _ownerId;
-    private string _title;
-    private string _text;
+    public ClassifiedAdId Id { get; init; }
+    private UserId _ownerId;
+    private string? _title;
+    private string? _text;
     private decimal _price;
 
-    public ClassifiedAd(Guid id, Guid ownerId)
+    public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
     {
-      if (id == default)
-      {
-        throw new ArgumentException(
-          "Classified Ad identity must be specified",
-          nameof(id)
-        );
-      }
-
-      if (ownerId == default)
-      {
-        throw new ArgumentException(
-          "Owner identity must be specified",
-          nameof(ownerId)
-        );
-      }
-
       Id = id;
       _ownerId = ownerId;
     }
