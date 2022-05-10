@@ -1,27 +1,26 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain
+namespace Marketplace.Domain;
+
+public class ClassifiedAdId : ValueObject
 {
-  public class ClassifiedAdId : ValueObject
+  private readonly Guid _value;
+
+  public ClassifiedAdId(Guid value)
   {
-    private readonly Guid _value;
-
-    public ClassifiedAdId(Guid value)
+    if (value == default)
     {
-      if (value == default)
-      {
-        throw new ArgumentNullException(
-          paramName: nameof(value),
-          message: "Classified Ad identity cannot be empty"
-        );
-      }
-
-      _value = value;
+      throw new ArgumentNullException(
+        paramName: nameof(value),
+        message: "Classified Ad identity cannot be empty"
+      );
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-      yield return _value;
-    }
+    _value = value;
+  }
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return _value;
   }
 }

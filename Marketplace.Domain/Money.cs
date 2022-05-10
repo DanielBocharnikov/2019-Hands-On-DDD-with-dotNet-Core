@@ -1,73 +1,101 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain
+namespace Marketplace.Domain;
+
+public class Money : ValueObject
 {
-  public class Money : ValueObject
+  public decimal Amount { get; init; }
+  public CurrencyDetails Currency { get; init; }
+
+  public const string DEFAULTCURRENCY = "EUR";
+
+  public static Money FromDecimal(
+    decimal amount,
+    string currencyCode,
+    ICurrencyLookup currencyLookup) =>
+      new(amount, currencyCode, currencyLookup);
+
+  public static Money FromString(
+    string amount,
+    string currencyCode,
+    ICurrencyLookup currencyLookup) =>
+      new(decimal.Parse(amount), currencyCode, currencyLookup);
+
+  protected Money(
+      decimal amount,
+      string currencyCode,
+      ICurrencyLookup currencyLookup)
   {
-    private const string DefaultCurrency = "EUR";
-    public decimal Amount { get; init; }
-    public string CurrencyCode { get; init; }
-
-    public static Money FromDecimal(decimal amount, string currency = DefaultCurrency) =>
-      new Money(amount, currency);
-
-    public static Money FromString(string amount, string currency = DefaultCurrency) =>
-      new Money(decimal.Parse(amount), currency);
-
-    protected Money(decimal amount, string currency = "EUR")
+    if (string.IsNullOrEmpty(currencyCode))
     {
-      if (decimal.Round(amount, 2) != amount)
-      {
-        throw new ArgumentOutOfRangeException(
-          paramName: nameof(amount),
-          message: "Amount cannot have more than two decimals"
-        );
-      }
-      Amount = amount;
-      CurrencyCode = currency;
+      throw new ArgumentNullException(
+      paramName: nameof(currencyCode),
+      message: "Currency code must be specified"
+      );
     }
 
-    public Money Add(Money summand)
-    {
-      if (CurrencyCode != summand.CurrencyCode)
-      {
-        throw new CurrencyMismatchException(
-          message: "Cannot sum amounts with different currencies"
-        );
-      }
+    CurrencyDetails currency = currencyLookup.FindCurrency(currencyCode);
 
-      return new Money(Amount + summand.Amount);
+    if (!currency.InUse)
+    {
+      throw new ArgumentException(
+      message: $"Currency {currencyCode} is not valid"
+      );
     }
 
-    public Money Subtract(Money subtrahend)
+    if (decimal.Round(amount, currency.DecimalPlaces) != amount)
     {
-      if (CurrencyCode != subtrahend.CurrencyCode)
-      {
-        throw new CurrencyMismatchException(
-          message: "Cannot subtract amounts with different currencies"
-        );
-      }
-
-      return new Money(Amount - subtrahend.Amount);
+      throw new ArgumentOutOfRangeException(
+      paramName: nameof(amount),
+      message: $"Amount in {currencyCode} cannot have more than {currency.DecimalPlaces} decimals"
+      );
     }
 
-    public static Money operator +(Money summand1, Money summand2) =>
-      summand1.Add(summand2);
-
-    public static Money operator -(Money minuend, Money subtrahend) =>
-      minuend.Subtract(subtrahend);
-
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-      yield return Amount;
-      yield return CurrencyCode;
-    }
+    Amount = amount;
+    Currency = currency;
   }
 
-  public class CurrencyMismatchException : Exception
+  private Money(decimal amount, CurrencyDetails currency)
   {
-    public Money(string message) : base(message)
+    Amount = amount;
+    Currency = currency;
+  }
+
+  public Money Add(Money summand)
+  {
+    if (Currency != summand.Currency)
     {
+      throw new CurrencyMismatchException(
+      message: "Cannot sum amounts with different currencies"
+      );
     }
+
+    return new Money(Amount + summand.Amount, Currency);
+  }
+
+  public Money Subtract(Money subtrahend)
+  {
+    if (Currency != subtrahend.Currency)
+    {
+      throw new CurrencyMismatchException(
+      message: "Cannot subtract amounts with different currencies"
+      );
+    }
+
+    return new Money(Amount - subtrahend.Amount, Currency);
+  }
+
+  public static Money operator +(Money summand1, Money summand2) =>
+  summand1.Add(summand2);
+
+  public static Money operator -(Money minuend, Money subtrahend) =>
+  minuend.Subtract(subtrahend);
+
+  public override string ToString() => $"{Currency.CurrencyCode} {Amount}";
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return Amount;
+    yield return Currency;
   }
 }

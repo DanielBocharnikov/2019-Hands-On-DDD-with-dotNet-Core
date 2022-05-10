@@ -1,27 +1,26 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain
+namespace Marketplace.Domain;
+
+public class UserId : ValueObject
 {
-  public class UserId : ValueObject
+  private readonly Guid _value;
+
+  public UserId(Guid value)
   {
-    private readonly Guid _value;
-
-    public UserId(Guid value)
+    if (value == default)
     {
-      if (value == default)
-      {
-        throw new ArgumentNullException(
-          paramName: nameof(value),
-          message: "User identity cannot be empty"
-        );
-      }
-
-      _value = value;
+      throw new ArgumentNullException(
+        paramName: nameof(value),
+        message: "User identity cannot be empty"
+      );
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-      yield return _value;
-    }
+    _value = value;
+  }
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return _value;
   }
 }
