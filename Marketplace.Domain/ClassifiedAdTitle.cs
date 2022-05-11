@@ -7,6 +7,7 @@ namespace Marketplace.Domain;
 public sealed class ClassifiedAdTitle : ValueObject
 {
   private readonly string _value;
+  private static readonly Regex _regex = new("<.*?>");
 
   public static ClassifiedAdTitle FromString(string title) =>
     new(title);
@@ -20,7 +21,7 @@ public sealed class ClassifiedAdTitle : ValueObject
       .Replace("</b>", "**");
 
     return new ClassifiedAdTitle(
-      Regex.Replace(supportedTagsReplaced, "<.*?>", string.Empty)
+      _regex.Replace(supportedTagsReplaced, string.Empty)
     );
   }
 

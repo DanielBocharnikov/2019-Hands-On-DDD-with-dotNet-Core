@@ -1,14 +1,16 @@
 namespace Marketplace.Domain;
 
-public class Price : Money
+public sealed class Price : Money
 {
-  public Price(
+  public static new Price FromDecimal(
+    decimal amount, string currencyCode, ICurrencyLookup currencyLookup) =>
+      new(amount, currencyCode, currencyLookup);
+
+  private Price(
     decimal amount,
     string currencyCode,
-    ICurrencyLookup currencyLookup) : base(
-      amount,
-      currencyCode,
-      currencyLookup)
+    ICurrencyLookup currencyLookup)
+      : base(amount, currencyCode, currencyLookup)
   {
     if (amount < 0)
     {
@@ -17,5 +19,10 @@ public class Price : Money
         message: "Price cannot be negative"
       );
     }
+  }
+
+  private Price(decimal amount, string currencyCode)
+    : base(amount, new CurrencyDetails { CurrencyCode = currencyCode })
+  {
   }
 }

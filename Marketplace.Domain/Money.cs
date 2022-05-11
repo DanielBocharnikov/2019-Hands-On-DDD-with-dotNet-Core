@@ -1,3 +1,4 @@
+using System.Globalization;
 using Marketplace.Framework;
 
 namespace Marketplace.Domain;
@@ -19,7 +20,8 @@ public class Money : ValueObject
     string amount,
     string currencyCode,
     ICurrencyLookup currencyLookup) =>
-      new(decimal.Parse(amount), currencyCode, currencyLookup);
+      new(Convert.ToDecimal(amount, new CultureInfo("en-US")),
+        currencyCode, currencyLookup);
 
   protected Money(
       decimal amount,
@@ -55,7 +57,7 @@ public class Money : ValueObject
     Currency = currency;
   }
 
-  private Money(decimal amount, CurrencyDetails currency)
+  protected Money(decimal amount, CurrencyDetails currency)
   {
     Amount = amount;
     Currency = currency;

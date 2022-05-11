@@ -112,13 +112,13 @@ namespace Marketplace.Framework
 
     internal static Type GetUnproxiedType(object obj)
     {
-      const string eFCoreProxyPrefix = "Castle.Proxies.";
-      const string nHibernateProxyPostfix = "Proxy";
+      const string EFCoreProxyPrefix = "Castle.Proxies.";
+      const string NHibernateProxyPostfix = "Proxy";
 
       Type type = obj.GetType();
       string typeString = type.ToString();
 
-      if (typeString.Contains(eFCoreProxyPrefix) || typeString.EndsWith(nHibernateProxyPostfix))
+      if (typeString.Contains(EFCoreProxyPrefix) || typeString.EndsWith(NHibernateProxyPostfix))
       {
         return type.BaseType;
       }
