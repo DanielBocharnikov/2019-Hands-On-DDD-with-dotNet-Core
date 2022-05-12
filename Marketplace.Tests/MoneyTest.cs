@@ -8,7 +8,7 @@ namespace Marketplace.Tests;
 
 public class FakeCurrencyLookup : ICurrencyLookup
 {
-  private static readonly IEnumerable<CurrencyDetails> currencies =
+  private static readonly IEnumerable<CurrencyDetails> _currencies =
     new[]
     {
       new CurrencyDetails()
@@ -39,7 +39,7 @@ public class FakeCurrencyLookup : ICurrencyLookup
 
   public CurrencyDetails FindCurrency(string currencyCode)
   {
-    CurrencyDetails? currency = currencies.FirstOrDefault(x =>
+    CurrencyDetails? currency = _currencies.FirstOrDefault(x =>
       x.CurrencyCode == currencyCode);
 
     return currency ?? CurrencyDetails.None;
@@ -48,14 +48,14 @@ public class FakeCurrencyLookup : ICurrencyLookup
 
 public class MoneyTest
 {
-  private static readonly ICurrencyLookup currencyLookup =
+  private static readonly ICurrencyLookup _currencyLookup =
     new FakeCurrencyLookup();
 
   [Fact]
   public void TwoWithTheSameAmountShouldBeEqual()
   {
-    var firstAmount = Money.FromDecimal(5, "EUR", currencyLookup);
-    var secondAmount = Money.FromDecimal(5, "EUR", currencyLookup);
+    var firstAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
+    var secondAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
 
     Assert.Equal(firstAmount, secondAmount);
   }
@@ -63,8 +63,8 @@ public class MoneyTest
   [Fact]
   public void TwoOfSameAmountButDifferentCurrenciesShouldNotBeEqual()
   {
-    var firstAmount = Money.FromDecimal(5, "USD", currencyLookup);
-    var secondAmount = Money.FromDecimal(5, "EUR", currencyLookup);
+    var firstAmount = Money.FromDecimal(5, "USD", _currencyLookup);
+    var secondAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
 
     Assert.NotEqual(firstAmount, secondAmount);
   }
@@ -72,11 +72,11 @@ public class MoneyTest
   [Fact]
   public void SumOfMoneyGivesFullAmount()
   {
-    var coin1 = Money.FromDecimal(1, "EUR", currencyLookup);
-    var coin2 = Money.FromDecimal(2, "EUR", currencyLookup);
-    var coin3 = Money.FromDecimal(2, "EUR", currencyLookup);
+    var coin1 = Money.FromDecimal(1, "EUR", _currencyLookup);
+    var coin2 = Money.FromDecimal(2, "EUR", _currencyLookup);
+    var coin3 = Money.FromDecimal(2, "EUR", _currencyLookup);
 
-    var banknote = Money.FromDecimal(5, "EUR", currencyLookup);
+    var banknote = Money.FromDecimal(5, "EUR", _currencyLookup);
 
     Assert.Equal(coin1 + coin2 + coin3, banknote);
   }
@@ -84,8 +84,8 @@ public class MoneyTest
   [Fact]
   public void FromStringAndFromDecimalShouldBeEqual()
   {
-    var firstAmount = Money.FromDecimal(5, "EUR", currencyLookup);
-    var secondAmount = Money.FromString("5.00", "EUR", currencyLookup);
+    var firstAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
+    var secondAmount = Money.FromString("5.00", "EUR", _currencyLookup);
 
     Assert.Equal(firstAmount, secondAmount);
   }
@@ -93,23 +93,23 @@ public class MoneyTest
   [Fact]
   public void UnusedCurrencyShouldNotBeAllowed() =>
     _ = Assert.Throws<ArgumentException>(() =>
-      Money.FromDecimal(100, "DEM", currencyLookup));
+      Money.FromDecimal(100, "DEM", _currencyLookup));
 
   [Fact]
   public void UnknownCurrencyShouldNotBeAllowed() =>
     _ = Assert.Throws<ArgumentException>(() =>
-      Money.FromDecimal(100, "What", currencyLookup));
+      Money.FromDecimal(100, "What", _currencyLookup));
 
   [Fact]
   public void ThrowWhenTooManyDecimalPlaces() =>
     _ = Assert.Throws<ArgumentOutOfRangeException>(() =>
-      Money.FromDecimal(100.123m, "EUR", currencyLookup));
+      Money.FromDecimal(100.123m, "EUR", _currencyLookup));
 
   [Fact]
   public void ThrowsOnAddingDifferentCurrencies()
   {
-    var firstAmount = Money.FromDecimal(5, "USD", currencyLookup);
-    var secondAmount = Money.FromDecimal(5, "EUR", currencyLookup);
+    var firstAmount = Money.FromDecimal(5, "USD", _currencyLookup);
+    var secondAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
 
     _ = Assert.Throws<CurrencyMismatchException>(() =>
       firstAmount + secondAmount);
@@ -118,8 +118,8 @@ public class MoneyTest
   [Fact]
   public void ThrowsOnSubstractingDifferentCurrencies()
   {
-    var firstAmount = Money.FromDecimal(5, "USD", currencyLookup);
-    var secondAmount = Money.FromDecimal(5, "EUR", currencyLookup);
+    var firstAmount = Money.FromDecimal(5, "USD", _currencyLookup);
+    var secondAmount = Money.FromDecimal(5, "EUR", _currencyLookup);
 
     _ = Assert.Throws<CurrencyMismatchException>(() =>
       firstAmount - secondAmount);
