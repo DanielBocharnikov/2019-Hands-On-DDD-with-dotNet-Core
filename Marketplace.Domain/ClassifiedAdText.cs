@@ -8,7 +8,7 @@ public sealed class ClassifiedAdText : ValueObject
 
   private readonly string _value;
 
-  private ClassifiedAdText(string text) => _value = text;
+  internal ClassifiedAdText(string text) => _value = text;
 
   public static implicit operator string(ClassifiedAdText text) =>
     text._value;

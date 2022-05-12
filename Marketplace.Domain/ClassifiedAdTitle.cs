@@ -9,8 +9,11 @@ public sealed class ClassifiedAdTitle : ValueObject
   private readonly string _value;
   private static readonly Regex _regex = new("<.*?>");
 
-  public static ClassifiedAdTitle FromString(string title) =>
-    new(title);
+  public static ClassifiedAdTitle FromString(string title)
+  {
+    CheckValidity(title);
+    return new(title);
+  }
 
   public static ClassifiedAdTitle FromHtml(string htmlTitle)
   {
@@ -20,12 +23,21 @@ public sealed class ClassifiedAdTitle : ValueObject
       .Replace("<b>", "**")
       .Replace("</b>", "**");
 
-    return new ClassifiedAdTitle(
-      _regex.Replace(supportedTagsReplaced, string.Empty)
-    );
+    string? value = _regex.Replace(supportedTagsReplaced, string.Empty);
+
+    CheckValidity(value);
+
+    return new ClassifiedAdTitle(value);
   }
 
-  private ClassifiedAdTitle(string value)
+  internal ClassifiedAdTitle(string value) => _value = value;
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return _value;
+  }
+
+  private static void CheckValidity(string value)
   {
     if (value.Length > 100)
     {
@@ -34,13 +46,6 @@ public sealed class ClassifiedAdTitle : ValueObject
         message: "Title cannot be longer than 100 characters"
       );
     }
-
-    _value = value;
-  }
-
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return _value;
   }
 
   public static implicit operator string(ClassifiedAdTitle self) =>
