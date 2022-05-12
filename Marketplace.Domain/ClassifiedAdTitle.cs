@@ -42,4 +42,7 @@ public sealed class ClassifiedAdTitle : ValueObject
   {
     yield return _value;
   }
+
+  public static implicit operator string(ClassifiedAdTitle self) =>
+    self._value;
 }

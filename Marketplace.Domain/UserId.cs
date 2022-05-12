@@ -23,4 +23,6 @@ public class UserId : ValueObject
   {
     yield return _value;
   }
+
+  public static implicit operator Guid(UserId self) => self._value;
 }

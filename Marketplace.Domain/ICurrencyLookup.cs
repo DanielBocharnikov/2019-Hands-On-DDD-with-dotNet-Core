@@ -9,7 +9,7 @@ public interface ICurrencyLookup
 
 public class CurrencyDetails : ValueObject
 {
-  public string? CurrencyCode { get; set; }
+  public string CurrencyCode { get; set; } = string.Empty;
   public bool InUse { get; set; }
   public int DecimalPlaces { get; set; }
 

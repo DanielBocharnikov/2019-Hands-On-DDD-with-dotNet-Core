@@ -23,4 +23,7 @@ public class ClassifiedAdId : ValueObject
   {
     yield return _value;
   }
+
+  public static implicit operator Guid(ClassifiedAdId self)
+    => self._value;
 }
