@@ -10,4 +10,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Marketplace.Framework\Marketplace.Framework.csproj" />
+    <ProjectReference Include="..\Marketplace.Domain\Marketplace.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

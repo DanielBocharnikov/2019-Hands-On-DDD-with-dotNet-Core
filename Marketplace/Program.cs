@@ -1,19 +1,19 @@
-var builder = WebApplication.CreateBuilder(args);
+using Marketplace.Api;
 
-// Add services to the container.
+WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+builder.Services.AddSingleton<ClassifiedAdsApplicationService>();
 
-// Configure the HTTP request pipeline.
+WebApplication? app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  _ = app.UseSwagger();
+  _ = app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

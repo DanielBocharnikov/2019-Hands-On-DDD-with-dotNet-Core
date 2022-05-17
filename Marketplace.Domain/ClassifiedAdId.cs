@@ -26,4 +26,6 @@ public class ClassifiedAdId : ValueObject
 
   public static implicit operator Guid(ClassifiedAdId self)
     => self._value;
+
+  public override string ToString() => _value.ToString();
 }
