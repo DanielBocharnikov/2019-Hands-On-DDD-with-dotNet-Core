@@ -2,13 +2,17 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain;
 
-public class ClassifiedAd : Entity
+public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
-  public ClassifiedAdId? Id { get; private set; }
+  private readonly List<Picture> _pictures = new();
+  private Picture? FirstPicture => _pictures
+    .OrderBy(x => x.OrderId)
+    .FirstOrDefault();
   public UserId? OwnerId { get; private set; }
   public ClassifiedAdTitle? Title { get; private set; }
   public ClassifiedAdText? Text { get; private set; }
   public Price? Price { get; private set; }
+  public IEnumerable<Picture> Pictures => _pictures.AsEnumerable();
   public ClassifiedAdState State { get; private set; }
   public UserId? ApprovedBy { get; private set; }
 
@@ -41,8 +45,35 @@ public class ClassifiedAd : Entity
   public void RequestToPublish() =>
     Apply(new Events.ClassifiedAdSentToReview(Id!));
 
+  public void AddPicture(Uri pictureUri, PictureSize size) =>
+    Apply(new Events.PictureAddedToClassifiedAd(
+      ClassifiedAdId: Id!,
+      PictureId: new Guid(),
+      Url: pictureUri.ToString(),
+      Height: size.Height,
+      Width: size.Width,
+      OrderId: _pictures.Max(x => x.OrderId) + 1
+    ));
+
+  public void ResizePicture(PictureId pictureId, PictureSize newSize)
+  {
+    Picture? picture = FindPicture(pictureId);
+
+    if (picture is null)
+    {
+      throw new InvalidOperationException(
+        "Cannot resize a picture that doesn't exists.");
+    }
+
+    picture.Resize(newSize);
+  }
+
+  private Picture? FindPicture(PictureId id) =>
+    _pictures.Find(x => x.Id! == id);
+
   protected override void When(object @event)
   {
+    Picture picture;
     switch (@event)
     {
       case Events.ClassifiedAdCreated e:
@@ -62,6 +93,11 @@ public class ClassifiedAd : Entity
       case Events.ClassifiedAdSentToReview:
         State = ClassifiedAdState.PendingReview;
         break;
+      case Events.PictureAddedToClassifiedAd e:
+        picture = new Picture(Apply);
+        ApplyToEntity(picture, @event);
+        _pictures.Add(picture);
+        break;
     }
   }
 
@@ -75,12 +111,14 @@ public class ClassifiedAd : Entity
         ClassifiedAdState.PendingReview =>
           Title is not null
           && Text is not null
-          && Price?.Amount > decimal.Zero,
+          && Price?.Amount > decimal.Zero
+          && FirstPicture.HasCorrectSize(),
         ClassifiedAdState.Active =>
           Title is not null
           && Text is not null
           && Price?.Amount > decimal.Zero
-          && ApprovedBy is not null,
+          && ApprovedBy is not null
+          && FirstPicture.HasCorrectSize(),
         ClassifiedAdState.Inactive => true,
         ClassifiedAdState.MarkedAsSold => true,
         _ => true
@@ -93,4 +131,6 @@ public class ClassifiedAd : Entity
         $"Post-checks failed in state {State}");
     }
   }
+
+
 }

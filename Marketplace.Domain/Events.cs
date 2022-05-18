@@ -12,4 +12,10 @@ public static class Events
     string CurrencyCode);
 
   public record ClassifiedAdSentToReview(Guid Id);
+
+  public record PictureAddedToClassifiedAd(Guid ClassifiedAdId, Guid PictureId,
+    string Url, int Height, int Width, int OrderId);
+
+  public record ClassifiedAdPictureResized(Guid PictureId, int Height,
+    int Width);
 }
