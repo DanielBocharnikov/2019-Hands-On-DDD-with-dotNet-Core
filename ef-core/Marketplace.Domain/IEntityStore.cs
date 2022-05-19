@@ -2,7 +2,7 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain;
 
-public interface IEntityStore
+public interface IClassifiedAdRepository
 {
   Task<bool> Exists<T>(string entityId);
   Task<T> Load<T>(string entityId) where T : Entity;
