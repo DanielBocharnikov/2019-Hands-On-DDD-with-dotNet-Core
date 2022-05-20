@@ -1,5 +1,3 @@
-using Marketplace.Framework;
-
 namespace Marketplace.Domain;
 
 public interface IClassifiedAdRepository

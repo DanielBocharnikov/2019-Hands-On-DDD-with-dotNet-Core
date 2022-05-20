@@ -27,6 +27,8 @@ public class Picture : Entity<PictureId>
       case Events.ClassifiedAdPictureResized e:
         Size = new PictureSize { Height = e.Height, Width = e.Width };
         break;
+      default:
+        return;
     }
   }
 

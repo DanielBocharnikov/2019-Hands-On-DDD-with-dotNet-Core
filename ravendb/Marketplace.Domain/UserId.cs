@@ -4,7 +4,7 @@ namespace Marketplace.Domain;
 
 public class UserId : ValueObject
 {
-  private readonly Guid _value;
+  public Guid Value { get; }
 
   public UserId(Guid value)
   {
@@ -16,13 +16,18 @@ public class UserId : ValueObject
       );
     }
 
-    _value = value;
+    Value = value;
   }
 
   protected override IEnumerable<object> GetEqualityComponents()
   {
-    yield return _value;
+    yield return Value;
   }
 
-  public static implicit operator Guid(UserId self) => self._value;
+  public static implicit operator Guid(UserId self) => self.Value;
+
+  public static implicit operator UserId(string value)
+    => new(Guid.Parse(value));
+
+  public override string ToString() => Value.ToString();
 }

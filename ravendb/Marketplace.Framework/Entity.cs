@@ -20,6 +20,5 @@ namespace Marketplace.Framework
     void IInternalEventHandler.Handle(object @event) => When(@event);
 
     protected abstract void When(object @event);
-
   }
 }

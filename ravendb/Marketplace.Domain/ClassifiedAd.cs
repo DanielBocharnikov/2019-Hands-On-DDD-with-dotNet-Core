@@ -4,6 +4,11 @@ namespace Marketplace.Domain;
 
 public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
+  private string DbId
+  {
+    get => $"ClassifiedAd/{Id?.Value}";
+    set { }
+  }
   private readonly List<Picture> _pictures = new();
   private Picture? FirstPicture => _pictures
     .OrderBy(x => x.OrderId)
@@ -98,6 +103,8 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         ApplyToEntity(picture, @event);
         _pictures.Add(picture);
         break;
+      default:
+        return;
     }
   }
 
@@ -131,6 +138,4 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         $"Post-checks failed in state {State}");
     }
   }
-
-
 }
