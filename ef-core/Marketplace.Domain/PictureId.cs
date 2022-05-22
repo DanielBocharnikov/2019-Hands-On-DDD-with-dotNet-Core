@@ -2,16 +2,20 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain;
 
-public class PictureId : ValueObject
+public sealed class PictureId : ValueObject
 {
-  private readonly Guid _value;
+  public Guid Value { get; init; }
 
-  public PictureId(Guid value) => _value = value;
+  public PictureId(Guid value) => Value = value;
 
-  public static implicit operator Guid(PictureId self) => self._value;
+  private PictureId()
+  {
+  }
+
+  public static implicit operator Guid(PictureId self) => self.Value;
 
   protected override IEnumerable<object?> GetEqualityComponents()
   {
-    yield return _value;
+    yield return Value;
   }
 }

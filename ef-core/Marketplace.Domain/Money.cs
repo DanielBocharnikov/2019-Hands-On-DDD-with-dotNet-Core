@@ -6,7 +6,7 @@ namespace Marketplace.Domain;
 public class Money : ValueObject
 {
   public decimal Amount { get; init; }
-  public CurrencyDetails Currency { get; init; }
+  public CurrencyDetails? Currency { get; init; }
 
   public const string DEFAULTCURRENCY = "EUR";
 
@@ -63,28 +63,32 @@ public class Money : ValueObject
     Currency = currency;
   }
 
+  protected Money()
+  {
+  }
+
   public Money Add(Money summand)
   {
-    if (Currency != summand.Currency)
+    if (Currency! != summand.Currency!)
     {
       throw new CurrencyMismatchException(
       message: "Cannot sum amounts with different currencies"
       );
     }
 
-    return new Money(Amount + summand.Amount, Currency);
+    return new Money(Amount + summand.Amount, Currency!);
   }
 
   public Money Subtract(Money subtrahend)
   {
-    if (Currency != subtrahend.Currency)
+    if (Currency! != subtrahend.Currency!)
     {
       throw new CurrencyMismatchException(
       message: "Cannot subtract amounts with different currencies"
       );
     }
 
-    return new Money(Amount - subtrahend.Amount, Currency);
+    return new Money(Amount - subtrahend.Amount, Currency!);
   }
 
   public static Money operator +(Money summand1, Money summand2) =>
@@ -93,11 +97,11 @@ public class Money : ValueObject
   public static Money operator -(Money minuend, Money subtrahend) =>
   minuend.Subtract(subtrahend);
 
-  public override string ToString() => $"{Currency.CurrencyCode} {Amount}";
+  public override string ToString() => $"{Currency!.CurrencyCode} {Amount}";
 
   protected override IEnumerable<object> GetEqualityComponents()
   {
     yield return Amount;
-    yield return Currency;
+    yield return Currency!;
   }
 }

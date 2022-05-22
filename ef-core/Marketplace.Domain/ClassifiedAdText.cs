@@ -6,15 +6,19 @@ public sealed class ClassifiedAdText : ValueObject
 {
   public static ClassifiedAdText FromString(string text) => new(text);
 
-  private readonly string _value;
+  public static ClassifiedAdText NoText => new();
 
-  internal ClassifiedAdText(string text) => _value = text;
+  public string? Value { get; init; }
+
+  internal ClassifiedAdText(string text) => Value = text;
 
   public static implicit operator string(ClassifiedAdText text) =>
-    text._value;
+    text.Value!;
 
   protected override IEnumerable<object?> GetEqualityComponents()
   {
-    yield return _value;
+    yield return Value;
   }
+
+  private ClassifiedAdText() { }
 }

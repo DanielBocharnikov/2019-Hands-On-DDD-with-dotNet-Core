@@ -16,6 +16,12 @@ public sealed class Price : Money
     return new(amount, currencyCode, currencyLookup);
   }
 
+  public static Price NoPrice = new();
+
+  private Price()
+  {
+  }
+
   private Price(
     decimal amount,
     string currencyCode,
@@ -24,8 +30,17 @@ public sealed class Price : Money
   {
   }
 
-  internal Price(decimal amount, string currencyCode)
-    : base(amount, new CurrencyDetails { CurrencyCode = currencyCode })
+  internal Price(
+    decimal amount,
+    string currencyCode,
+    bool inUse,
+    int decimalPlaces)
+    : base(amount, new CurrencyDetails
+    {
+      CurrencyCode = currencyCode,
+      InUse = inUse,
+      DecimalPlaces = decimalPlaces
+    })
   {
   }
 }

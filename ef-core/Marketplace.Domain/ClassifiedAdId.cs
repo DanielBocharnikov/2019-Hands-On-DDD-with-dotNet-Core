@@ -4,7 +4,7 @@ namespace Marketplace.Domain;
 
 public class ClassifiedAdId : ValueObject
 {
-  private readonly Guid _value;
+  public Guid Value { get; init; }
 
   public ClassifiedAdId(Guid value)
   {
@@ -16,16 +16,23 @@ public class ClassifiedAdId : ValueObject
       );
     }
 
-    _value = value;
+    Value = value;
+  }
+
+  private ClassifiedAdId()
+  {
   }
 
   protected override IEnumerable<object> GetEqualityComponents()
   {
-    yield return _value;
+    yield return Value;
   }
 
   public static implicit operator Guid(ClassifiedAdId self)
-    => self._value;
+    => self.Value;
 
-  public override string ToString() => _value.ToString();
+  public static implicit operator ClassifiedAdId(string value)
+    => new(Guid.Parse(value));
+
+  public override string ToString() => Value.ToString();
 }

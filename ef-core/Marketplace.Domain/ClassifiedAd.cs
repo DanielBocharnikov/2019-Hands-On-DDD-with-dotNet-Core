@@ -4,16 +4,26 @@ namespace Marketplace.Domain;
 
 public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
+  public Guid ClassifiedAdId { get; private set; }
+
   private readonly List<Picture> _pictures = new();
+
   private Picture? FirstPicture => _pictures
     .OrderBy(x => x.OrderId)
     .FirstOrDefault();
+
   public UserId? OwnerId { get; private set; }
+
   public ClassifiedAdTitle? Title { get; private set; }
+
   public ClassifiedAdText? Text { get; private set; }
+
   public Price? Price { get; private set; }
+
   public IEnumerable<Picture> Pictures => _pictures.AsEnumerable();
+
   public ClassifiedAdState State { get; private set; }
+
   public UserId? ApprovedBy { get; private set; }
 
   public enum ClassifiedAdState
@@ -22,6 +32,10 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
     Active = 1,
     Inactive = 2,
     MarkedAsSold = 3
+  }
+
+  protected ClassifiedAd()
+  {
   }
 
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId) =>
@@ -38,7 +52,9 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
       new Events.ClassifiedAdPriceUpdated(
         Id!,
         price.Amount,
-        price.Currency.CurrencyCode
+        price.Currency!.CurrencyCode!,
+        price.Currency!.InUse,
+        price.Currency.DecimalPlaces
       )
     );
 
@@ -80,6 +96,11 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         Id = new ClassifiedAdId(e.Id);
         OwnerId = new UserId(e.OwnerId);
         State = ClassifiedAdState.Inactive;
+        ClassifiedAdId = e.Id;
+        Title = ClassifiedAdTitle.NoTitle;
+        Text = ClassifiedAdText.NoText;
+        Price = Price.NoPrice;
+        ApprovedBy = UserId.NoUser;
         break;
       case Events.ClassifiedAdTitleChanged e:
         Title = new ClassifiedAdTitle(e.Title);
@@ -88,7 +109,7 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         Text = new ClassifiedAdText(e.Text);
         break;
       case Events.ClassifiedAdPriceUpdated e:
-        Price = new Price(e.Price, e.CurrencyCode);
+        Price = new Price(e.Price, e.CurrencyCode, e.InUse, e.DecimalPlaces);
         break;
       case Events.ClassifiedAdSentToReview:
         State = ClassifiedAdState.PendingReview;
@@ -98,6 +119,8 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         ApplyToEntity(picture, @event);
         _pictures.Add(picture);
         break;
+      default:
+        return;
     }
   }
 
@@ -131,6 +154,4 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         $"Post-checks failed in state {State}");
     }
   }
-
-
 }
