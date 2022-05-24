@@ -1,18 +1,18 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.SharedCore;
 
-public class ClassifiedAdId : ValueObject
+public class UserId : ValueObject
 {
-  public Guid Value { get; init; }
+  public Guid Value { get; }
 
-  public ClassifiedAdId(Guid value)
+  public UserId(Guid value)
   {
     if (value == default)
     {
       throw new ArgumentNullException(
         paramName: nameof(value),
-        message: "Classified Ad identity cannot be empty"
+        message: "User identity cannot be empty"
       );
     }
 
@@ -24,10 +24,9 @@ public class ClassifiedAdId : ValueObject
     yield return Value;
   }
 
-  public static implicit operator Guid(ClassifiedAdId self)
-    => self.Value;
+  public static implicit operator Guid(UserId self) => self.Value;
 
-  public static implicit operator ClassifiedAdId(string value)
+  public static implicit operator UserId(string value)
     => new(Guid.Parse(value));
 
   public override string ToString() => Value.ToString();

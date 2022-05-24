@@ -1,4 +1,6 @@
-namespace Marketplace.Domain;
+using Marketplace.Domain.SharedCore;
+
+namespace Marketplace.Domain.ClassifiedAd;
 
 public sealed class Price : Money
 {

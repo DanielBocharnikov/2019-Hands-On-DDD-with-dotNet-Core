@@ -1,6 +1,7 @@
+using Marketplace.Domain.SharedCore;
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.ClassifiedAd;
 
 public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
@@ -12,7 +13,8 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   private readonly List<Picture> _pictures = new();
   private Picture? FirstPicture => _pictures
     .OrderBy(x => x.OrderId)
-    .FirstOrDefault();
+    .FirstOrDefault() ?? Picture.NoPicture;
+
   public UserId? OwnerId { get; private set; }
   public ClassifiedAdTitle? Title { get; private set; }
   public ClassifiedAdText? Text { get; private set; }
@@ -133,7 +135,7 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
     if (!valid)
     {
-      throw new InvalidEntityStateException(
+      throw new DomainExceptions.InvalidEntityStateException(
         this,
         $"Post-checks failed in state {State}");
     }

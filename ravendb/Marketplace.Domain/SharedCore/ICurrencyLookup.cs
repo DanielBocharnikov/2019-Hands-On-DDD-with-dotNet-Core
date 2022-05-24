@@ -1,6 +1,6 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.SharedCore;
 
 public interface ICurrencyLookup
 {

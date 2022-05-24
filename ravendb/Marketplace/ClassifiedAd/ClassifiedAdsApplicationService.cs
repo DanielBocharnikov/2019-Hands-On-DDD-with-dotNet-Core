@@ -1,8 +1,9 @@
-using Marketplace.Domain;
+using Marketplace.Domain.ClassifiedAd;
+using Marketplace.Domain.SharedCore;
 using Marketplace.Framework;
-using static Marketplace.Contracts.ClassifiedAds;
+using static Marketplace.ClassifiedAd.Contracts;
 
-namespace Marketplace.Api;
+namespace Marketplace.ClassifiedAd;
 
 public class ClassifiedAdsApplicationService : IApplicationService
 {
@@ -33,7 +34,9 @@ public class ClassifiedAdsApplicationService : IApplicationService
           _currencyLookup))),
       V1.RequestToPublish cmd => HandleUpdate(cmd.Id, ad =>
         ad.RequestToPublish()),
-      _ => Task.CompletedTask,
+      _ => throw new InvalidOperationException(
+          $"Command type {command.GetType().FullName} is unknown."
+        ),
     };
 
   private async Task HandleCreate(V1.Create cmd)
@@ -44,7 +47,7 @@ public class ClassifiedAdsApplicationService : IApplicationService
         " already exists");
     }
 
-    var classifiedAd = new ClassifiedAd(
+    var classifiedAd = new Domain.ClassifiedAd.ClassifiedAd(
       new ClassifiedAdId(cmd.Id),
       new UserId(cmd.OwnerId)
     );
@@ -55,9 +58,9 @@ public class ClassifiedAdsApplicationService : IApplicationService
 
   private async Task HandleUpdate(
     Guid classifiedAdId,
-    Action<ClassifiedAd> operation)
+    Action<Domain.ClassifiedAd.ClassifiedAd> operation)
   {
-    ClassifiedAd? classifiedAd = await _repository
+    Domain.ClassifiedAd.ClassifiedAd? classifiedAd = await _repository
       .Load(classifiedAdId.ToString());
 
     if (classifiedAd == null)

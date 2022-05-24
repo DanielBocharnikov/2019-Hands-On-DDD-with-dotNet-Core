@@ -1,6 +1,6 @@
-using Marketplace.Domain;
+using Marketplace.Domain.SharedCore;
 
-namespace Marketplace;
+namespace Marketplace.Infrastructure;
 
 public class FixedCurrencyLookup : ICurrencyLookup
 {

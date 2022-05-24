@@ -1,7 +1,7 @@
 using System.Globalization;
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.SharedCore;
 
 public class Money : ValueObject
 {
@@ -67,7 +67,7 @@ public class Money : ValueObject
   {
     if (Currency != summand.Currency)
     {
-      throw new CurrencyMismatchException(
+      throw new DomainExceptions.CurrencyMismatchException(
       message: "Cannot sum amounts with different currencies"
       );
     }
@@ -79,7 +79,7 @@ public class Money : ValueObject
   {
     if (Currency != subtrahend.Currency)
     {
-      throw new CurrencyMismatchException(
+      throw new DomainExceptions.CurrencyMismatchException(
       message: "Cannot subtract amounts with different currencies"
       );
     }

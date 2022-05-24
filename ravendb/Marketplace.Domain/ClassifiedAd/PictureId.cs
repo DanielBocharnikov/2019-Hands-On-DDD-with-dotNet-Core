@@ -1,6 +1,6 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.ClassifiedAd;
 
 public sealed class PictureId : ValueObject
 {

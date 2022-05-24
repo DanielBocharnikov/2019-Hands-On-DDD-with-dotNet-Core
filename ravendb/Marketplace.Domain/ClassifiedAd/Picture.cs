@@ -1,9 +1,16 @@
 using Marketplace.Framework;
 
-namespace Marketplace.Domain;
+namespace Marketplace.Domain.ClassifiedAd;
 
 public class Picture : Entity<PictureId>
 {
+  internal static Picture NoPicture => new()
+  {
+    Size = new PictureSize(600, 800),
+    Location = default,
+    OrderId = default,
+  };
+
   internal PictureSize? Size { get; set; }
 
   internal Uri? Location { get; set; }
@@ -13,6 +20,8 @@ public class Picture : Entity<PictureId>
   public Picture(Action<object> applier) : base(applier)
   {
   }
+
+  internal Picture() { }
 
   protected override void When(object @event)
   {
