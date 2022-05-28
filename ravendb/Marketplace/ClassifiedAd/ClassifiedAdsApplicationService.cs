@@ -1,7 +1,7 @@
 using Marketplace.Domain.ClassifiedAd;
 using Marketplace.Domain.SharedCore;
 using Marketplace.Framework;
-using static Marketplace.ClassifiedAd.Contracts;
+using static Marketplace.ClassifiedAd.Commands;
 
 namespace Marketplace.ClassifiedAd;
 
@@ -25,15 +25,23 @@ public class ClassifiedAdsApplicationService : IApplicationService
     command switch
     {
       V1.Create cmd => HandleCreate(cmd),
+
       V1.SetTitle cmd => HandleUpdate(cmd.Id, ad =>
         ad.SetTitle(ClassifiedAdTitle.FromString(cmd.Title))),
+
       V1.UpdateText cmd => HandleUpdate(cmd.Id, ad =>
         ad.UpdateText(ClassifiedAdText.FromString(cmd.Text))),
+
       V1.UpdatePrice cmd => HandleUpdate(cmd.Id, ad =>
         ad.UpdatePrice(Price.FromDecimal(cmd.Price, cmd.CurrencyCode,
           _currencyLookup))),
+
       V1.RequestToPublish cmd => HandleUpdate(cmd.Id, ad =>
         ad.RequestToPublish()),
+
+      V1.Publish cmd => HandleUpdate(cmd.Id, c =>
+        c.Publish(new UserId(cmd.ApprovedBy))),
+
       _ => throw new InvalidOperationException(
           $"Command type {command.GetType().FullName} is unknown."
         ),
@@ -60,8 +68,8 @@ public class ClassifiedAdsApplicationService : IApplicationService
     Guid classifiedAdId,
     Action<Domain.ClassifiedAd.ClassifiedAd> operation)
   {
-    Domain.ClassifiedAd.ClassifiedAd? classifiedAd = await _repository
-      .Load(classifiedAdId.ToString());
+    Domain.ClassifiedAd.ClassifiedAd? classifiedAd
+      = await _repository.Load(classifiedAdId.ToString());
 
     if (classifiedAd == null)
     {

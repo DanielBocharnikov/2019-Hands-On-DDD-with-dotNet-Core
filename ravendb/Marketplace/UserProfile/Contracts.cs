@@ -4,15 +4,15 @@ public static class Contracts
 {
   public static class V1
   {
-    public record RegisterUser(
+    public record class RegisterUser(
       Guid UserId,
       string FullName,
       string DisplayName);
 
-    public record UpdateUserFullName(Guid UserId, string FullName);
+    public record class UpdateUserFullName(Guid UserId, string FullName);
 
-    public record UpdateUserDisplayName(Guid UserId, string DisplayName);
+    public record class UpdateUserDisplayName(Guid UserId, string DisplayName);
 
-    public record UpdateUserProfilePhoto(Guid UserId, string PhotoUrl);
+    public record class UpdateUserProfilePhoto(Guid UserId, string PhotoUrl);
   }
 }

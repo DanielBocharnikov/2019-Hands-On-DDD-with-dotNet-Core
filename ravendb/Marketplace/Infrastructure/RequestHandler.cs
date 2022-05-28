@@ -1,10 +1,11 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Marketplace.Infrastructure;
 
 public static class RequestHandler
 {
-  public static async Task<IActionResult> HandleRequest<T>(
+  public static async Task<IActionResult> HandleCommand<T>(
     T request,
     Func<T, Task> handlerHandle,
     Serilog.ILogger log)
@@ -18,6 +19,26 @@ public static class RequestHandler
     catch (Exception ex)
     {
       log.Error(ex, "Error handling the request");
+
+      return new BadRequestObjectResult(new
+      {
+        error = ex.Message,
+        stackTrace = ex.StackTrace
+      });
+    }
+  }
+
+  public static async Task<IActionResult> HandleQuery<TModel>(
+    Func<Task<TModel>> query, Serilog.ILogger log
+  )
+  {
+    try
+    {
+      return new OkObjectResult(await query());
+    }
+    catch (Exception ex)
+    {
+      log.Error(ex, "Error handling query");
 
       return new BadRequestObjectResult(new
       {

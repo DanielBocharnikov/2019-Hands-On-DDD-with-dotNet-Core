@@ -4,18 +4,17 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public class Picture : Entity<PictureId>
 {
-  internal static Picture NoPicture => new()
+  public ClassifiedAdId? ParentId { get; private set; }
+
+  public PictureSize Size { get; private set; } = new PictureSize
   {
-    Size = new PictureSize(600, 800),
-    Location = default,
-    OrderId = default,
+    Height = 600,
+    Width = 800,
   };
 
-  internal PictureSize? Size { get; set; }
+  public string Location { get; private set; } = string.Empty;
 
-  internal Uri? Location { get; set; }
-
-  internal int OrderId { get; set; }
+  public int OrderId { get; private set; }
 
   public Picture(Action<object> applier) : base(applier)
   {
@@ -28,8 +27,9 @@ public class Picture : Entity<PictureId>
     switch (@event)
     {
       case Events.PictureAddedToClassifiedAd e:
+        ParentId = new ClassifiedAdId(e.ClassifiedAdId);
         Id = new PictureId(e.PictureId);
-        Location = new Uri(e.Url);
+        Location = e.Url;
         Size = new PictureSize { Height = e.Height, Width = e.Width };
         OrderId = e.OrderId;
         break;
@@ -44,6 +44,7 @@ public class Picture : Entity<PictureId>
   public void Resize(PictureSize newSize) =>
     Apply(new Events.ClassifiedAdPictureResized
     (
+      ClassifiedAdId: ParentId!.Value,
       PictureId: Id!,
       Height: newSize.Height,
       Width: newSize.Width

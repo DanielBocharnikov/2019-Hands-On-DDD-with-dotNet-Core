@@ -13,7 +13,12 @@ public class CurrencyDetails : ValueObject
   public bool InUse { get; set; }
   public int DecimalPlaces { get; set; }
 
-  public static CurrencyDetails None => new() { InUse = false };
+  public static CurrencyDetails None => new()
+  {
+    CurrencyCode = string.Empty,
+    InUse = false,
+    DecimalPlaces = 0
+  };
 
   protected override IEnumerable<object?> GetEqualityComponents()
   {

@@ -18,12 +18,12 @@ public class RavenDbRepository<T, TId>
     _entityId = entityId;
   }
 
-  public Task Add(T entity)
-    => _session.StoreAsync(entity, _entityId(entity.Id!));
+  public async Task Add(T entity)
+    => await _session.StoreAsync(entity, _entityId(entity.Id!));
 
-  public Task<bool> Exists(TId id)
-    => _session.Advanced.ExistsAsync(_entityId(id));
+  public async Task<bool> Exists(TId id)
+    => await _session.Advanced.ExistsAsync(_entityId(id));
 
-  public Task<T> Load(TId id)
-    => _session.LoadAsync<T>(_entityId(id));
+  public async Task<T> Load(TId id)
+    => await _session.LoadAsync<T>(_entityId(id));
 }

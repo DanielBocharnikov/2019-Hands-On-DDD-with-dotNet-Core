@@ -6,7 +6,7 @@ namespace Marketplace.Domain.SharedCore;
 public class Money : ValueObject
 {
   public decimal Amount { get; init; }
-  public CurrencyDetails Currency { get; init; }
+  public CurrencyDetails Currency { get; init; } = CurrencyDetails.None;
 
   public const string DEFAULTCURRENCY = "EUR";
 
@@ -62,6 +62,8 @@ public class Money : ValueObject
     Amount = amount;
     Currency = currency;
   }
+
+  protected Money() { }
 
   public Money Add(Money summand)
   {

@@ -26,8 +26,19 @@ public sealed class Price : Money
   {
   }
 
-  internal Price(decimal amount, string currencyCode)
-    : base(amount, new CurrencyDetails { CurrencyCode = currencyCode })
+  internal Price(
+    decimal amount,
+    string currencyCode,
+    bool inUse,
+    int decimalPlaces)
+    : base(amount, new CurrencyDetails
+    {
+      CurrencyCode = currencyCode,
+      InUse = inUse,
+      DecimalPlaces = decimalPlaces
+    })
   {
   }
+
+  private Price() { }
 }

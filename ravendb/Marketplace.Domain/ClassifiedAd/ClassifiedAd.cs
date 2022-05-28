@@ -7,20 +7,23 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
   private string DbId
   {
-    get => $"ClassifiedAd/{Id?.Value}";
+    get => $"ClassifiedAd/{Id!.Value}";
     set { }
   }
   private readonly List<Picture> _pictures = new();
-  private Picture? FirstPicture => _pictures
-    .OrderBy(x => x.OrderId)
-    .FirstOrDefault() ?? Picture.NoPicture;
 
   public UserId? OwnerId { get; private set; }
+
   public ClassifiedAdTitle? Title { get; private set; }
+
   public ClassifiedAdText? Text { get; private set; }
+
   public Price? Price { get; private set; }
+
   public IEnumerable<Picture> Pictures => _pictures.AsEnumerable();
+
   public ClassifiedAdState State { get; private set; }
+
   public UserId? ApprovedBy { get; private set; }
 
   public enum ClassifiedAdState
@@ -32,25 +35,32 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   }
 
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId) =>
-    Apply(new Events.ClassifiedAdCreated(id, ownerId));
+    Apply(new Events.ClassifiedAdCreated(Id: id, OwnerId: ownerId));
 
   public void SetTitle(ClassifiedAdTitle title) =>
-    Apply(new Events.ClassifiedAdTitleChanged(Id!, title));
+    Apply(new Events.ClassifiedAdTitleChanged(Id: Id!, Title: title));
 
   public void UpdateText(ClassifiedAdText text) =>
-    Apply(new Events.ClassifiedAdTextUpdated(Id!, text));
+    Apply(new Events.ClassifiedAdTextUpdated(Id: Id!, Text: text));
 
   public void UpdatePrice(Price price) =>
     Apply(
       new Events.ClassifiedAdPriceUpdated(
-        Id!,
-        price.Amount,
-        price.Currency.CurrencyCode
+        Id: Id!,
+        Price: price.Amount,
+        CurrencyCode: price.Currency.CurrencyCode,
+        InUse: price.Currency.InUse,
+        DecimalPlaces: price.Currency.DecimalPlaces
       )
     );
 
   public void RequestToPublish() =>
-    Apply(new Events.ClassifiedAdSentToReview(Id!));
+    Apply(new Events.ClassifiedAdSentToReview(Id: Id!));
+
+  public void Publish(UserId userId)
+    => Apply(new Events.ClassifiedAdPublished(
+      Id: Id!,
+      ApprovedBy: userId));
 
   public void AddPicture(Uri pictureUri, PictureSize size) =>
     Apply(new Events.PictureAddedToClassifiedAd(
@@ -81,6 +91,7 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   protected override void When(object @event)
   {
     Picture picture;
+
     switch (@event)
     {
       case Events.ClassifiedAdCreated e:
@@ -95,10 +106,14 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         Text = new ClassifiedAdText(e.Text);
         break;
       case Events.ClassifiedAdPriceUpdated e:
-        Price = new Price(e.Price, e.CurrencyCode);
+        Price = new Price(e.Price, e.CurrencyCode, e.InUse, e.DecimalPlaces);
         break;
       case Events.ClassifiedAdSentToReview:
         State = ClassifiedAdState.PendingReview;
+        break;
+      case Events.ClassifiedAdPublished e:
+        ApprovedBy = new UserId(e.ApprovedBy);
+        State = ClassifiedAdState.Active;
         break;
       case Events.PictureAddedToClassifiedAd e:
         picture = new Picture(Apply);
@@ -120,14 +135,12 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
         ClassifiedAdState.PendingReview =>
           Title is not null
           && Text is not null
-          && Price?.Amount > decimal.Zero
-          && FirstPicture.HasCorrectSize(),
+          && Price!.Amount > decimal.Zero,
         ClassifiedAdState.Active =>
           Title is not null
           && Text is not null
-          && Price?.Amount > decimal.Zero
-          && ApprovedBy is not null
-          && FirstPicture.HasCorrectSize(),
+          && Price!.Amount > decimal.Zero
+          && ApprovedBy is not null,
         ClassifiedAdState.Inactive => true,
         ClassifiedAdState.MarkedAsSold => true,
         _ => true

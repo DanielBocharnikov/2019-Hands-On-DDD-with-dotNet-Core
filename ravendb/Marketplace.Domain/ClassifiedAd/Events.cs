@@ -2,20 +2,34 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public static class Events
 {
-  public record ClassifiedAdCreated(Guid Id, Guid OwnerId);
+  public record class ClassifiedAdCreated(Guid Id, Guid OwnerId);
 
-  public record ClassifiedAdTitleChanged(Guid Id, string Title);
+  public record class ClassifiedAdTitleChanged(Guid Id, string Title);
 
-  public record ClassifiedAdTextUpdated(Guid Id, string Text);
+  public record class ClassifiedAdTextUpdated(Guid Id, string Text);
 
-  public record ClassifiedAdPriceUpdated(Guid Id, decimal Price,
-    string CurrencyCode);
+  public record ClassifiedAdPriceUpdated(
+    Guid Id,
+    decimal Price,
+    string CurrencyCode,
+    bool InUse,
+    int DecimalPlaces);
 
-  public record ClassifiedAdSentToReview(Guid Id);
+  public record class ClassifiedAdSentToReview(Guid Id);
 
-  public record PictureAddedToClassifiedAd(Guid ClassifiedAdId, Guid PictureId,
-    string Url, int Height, int Width, int OrderId);
+  public record class ClassifiedAdPublished(Guid Id, Guid ApprovedBy);
 
-  public record ClassifiedAdPictureResized(Guid PictureId, int Height,
+  public record class PictureAddedToClassifiedAd(
+    Guid ClassifiedAdId,
+    Guid PictureId,
+    string Url,
+    int Height,
+    int Width,
+    int OrderId);
+
+  public record class ClassifiedAdPictureResized(
+    Guid ClassifiedAdId,
+    Guid PictureId,
+    int Height,
     int Width);
 }

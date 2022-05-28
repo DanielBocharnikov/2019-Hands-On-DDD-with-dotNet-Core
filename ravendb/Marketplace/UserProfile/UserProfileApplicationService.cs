@@ -1,4 +1,3 @@
-using System.Diagnostics.Contracts;
 using Marketplace.Domain.SharedCore;
 using Marketplace.Domain.UserProfile;
 using Marketplace.Framework;

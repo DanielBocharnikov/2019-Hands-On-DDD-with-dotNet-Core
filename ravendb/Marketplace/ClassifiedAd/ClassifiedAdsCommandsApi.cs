@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using static Marketplace.ClassifiedAd.Contracts;
+using static Marketplace.ClassifiedAd.Commands;
 using ILogger = Serilog.ILogger;
 
 namespace Marketplace.ClassifiedAd;
@@ -35,10 +35,15 @@ public class ClassifiedAdsCommandsApi : ControllerBase
   public async Task<IActionResult> Put(V1.UpdatePrice request) =>
     await HandleRequest(request, _appService.Handle);
 
-  [Route("publish")]
+  [Route("requestpublish")]
   [HttpPut]
   public async Task<IActionResult> Put(V1.RequestToPublish request) =>
     await HandleRequest(request, _appService.Handle);
+
+  [Route("publish")]
+  [HttpPut]
+  public async Task<IActionResult> Put(V1.Publish request) =>
+  await HandleRequest(request, _appService.Handle);
 
   private async Task<IActionResult> HandleRequest<T>(
     T request,
