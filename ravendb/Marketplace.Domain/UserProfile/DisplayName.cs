@@ -5,7 +5,9 @@ namespace Marketplace.Domain.UserProfile;
 
 public sealed class DisplayName : ValueObject
 {
-  public string? Value { get; init; }
+  public static DisplayName None => new() { };
+
+  public string Value { get; init; } = string.Empty;
 
   internal DisplayName(string displayName) => Value = displayName;
 
@@ -30,7 +32,7 @@ public sealed class DisplayName : ValueObject
   }
 
   public static implicit operator string(DisplayName displayName)
-    => displayName.Value!;
+    => displayName.Value;
 
   protected override IEnumerable<object?> GetEqualityComponents()
   {

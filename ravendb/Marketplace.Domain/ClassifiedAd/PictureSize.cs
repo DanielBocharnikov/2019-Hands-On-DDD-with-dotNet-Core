@@ -2,12 +2,23 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain.ClassifiedAd;
 
-public class PictureSize : ValueObject
+public sealed class PictureSize : ValueObject
 {
+  public static PictureSize None => new()
+  {
+    Height = 0,
+    Width = 0
+  };
+
   public int Height { get; internal set; }
 
   public int Width { get; internal set; }
 
+  /// <summary>
+  /// Ctor to safely create PictureSize value object elsewhere.
+  /// </summary>
+  /// <param name="height"></param>
+  /// <param name="width"></param>
   public PictureSize(int height, int width)
   {
     if (height <= 0)
@@ -30,6 +41,10 @@ public class PictureSize : ValueObject
     Width = width;
   }
 
+  /// <summary>
+  /// Ctor used for reapplying events from aggregate root and satisfies
+  /// serialization requirements.
+  /// </summary>
   internal PictureSize()
   {
   }

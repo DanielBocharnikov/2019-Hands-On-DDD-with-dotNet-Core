@@ -2,9 +2,11 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain.SharedCore;
 
-public class UserId : ValueObject
+public sealed class UserId : ValueObject
 {
-  public Guid Value { get; }
+  public static UserId None => new() { Value = Guid.Empty };
+
+  public Guid Value { get; internal set; }
 
   public UserId(Guid value)
   {
@@ -19,9 +21,12 @@ public class UserId : ValueObject
     Value = value;
   }
 
-  protected override IEnumerable<object> GetEqualityComponents()
+  /// <summary>
+  /// Ctor used for reapplying events from aggregate root and satisfies
+  /// serialization requirements.
+  /// </summary>
+  internal UserId()
   {
-    yield return Value;
   }
 
   public static implicit operator Guid(UserId self) => self.Value;
@@ -30,4 +35,9 @@ public class UserId : ValueObject
     => new(Guid.Parse(value));
 
   public override string ToString() => Value.ToString();
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return Value;
+  }
 }

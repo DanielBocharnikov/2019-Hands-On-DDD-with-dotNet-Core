@@ -16,11 +16,11 @@ public static class Queries
       .Where(x => x.State == ClassifiedAdState.Active)
       .Select(x => new PublicClassifiedAdListItem
       {
-        ClassifiedAdId = x.Id!.Value,
-        Title = x.Title!.Value,
-        Price = x.Price!.Amount,
+        ClassifiedAdId = x.Id.Value,
+        Title = x.Title.Value,
+        Price = x.Price.Amount,
         CurrencyCode = x.Price.Currency.CurrencyCode,
-        PhotoUrl = x.Pictures.First().Location!.ToString()
+        PhotoUrl = x.FirstPicture.Location
       })
       .PagedList(query.Page, query.PageSize);
 
@@ -31,11 +31,11 @@ public static class Queries
     .Where(x => x.OwnerId!.Value == query.OwnerId)
     .Select(x => new PublicClassifiedAdListItem
     {
-      ClassifiedAdId = x.Id!.Value,
-      Price = x.Price!.Amount,
-      Title = x.Title!.Value,
+      ClassifiedAdId = x.Id.Value,
+      Price = x.Price.Amount,
+      Title = x.Title.Value,
       CurrencyCode = x.Price.Currency.CurrencyCode,
-      PhotoUrl = x.Pictures.First().Location!.ToString()
+      PhotoUrl = x.FirstPicture.Location
     })
     .PagedList(query.Page, query.PageSize);
 
@@ -43,18 +43,19 @@ public static class Queries
     this IAsyncDocumentSession session,
     QueryModels.GetPublicClassifiedAd query
   ) => (from ad in session.Query<Domain.ClassifiedAd.ClassifiedAd>()
-        where ad.Id!.Value == query.ClassifiedAdId
+        where ad.Id.Value == query.ClassifiedAdId
         let user = RavenQuery.Load<Domain.UserProfile.UserProfile>(
           "UserProfile/" + ad.OwnerId!.Value
         )
         select new ClassifiedAdDetails
         {
-          ClassifiedAdId = ad.Id!.Value,
-          Title = ad.Title!.Value,
-          Description = ad.Text!.Value,
-          Price = ad.Price!.Amount,
+          ClassifiedAdId = ad.Id.Value,
+          Title = ad.Title.Value,
+          Description = ad.Text.Value,
+          Price = ad.Price.Amount,
           CurrencyCode = ad.Price.Currency.CurrencyCode,
-          SellerDisplayName = user.DisplayName.Value
+          SellerDisplayName = user.DisplayName.Value,
+          PhotoUrls = ad.Pictures.Select(x => x.Location).ToArray()
         }).SingleAsync();
 
   private static Task<List<T>> PagedList<T>(

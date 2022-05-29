@@ -7,24 +7,11 @@ public class FixedCurrencyLookup : ICurrencyLookup
   private static readonly IEnumerable<CurrencyDetails> _currencies =
       new[]
       {
-              new CurrencyDetails
-              {
-                  CurrencyCode = "EUR",
-                  DecimalPlaces = 2,
-                  InUse = true
-              },
-              new CurrencyDetails
-              {
-                  CurrencyCode = "USD",
-                  DecimalPlaces = 2,
-                  InUse = true
-              }
+              new CurrencyDetails("EUR", true, 2),
+              new CurrencyDetails("USD", true, 2)
       };
 
-  public CurrencyDetails FindCurrency(string currencyCode)
-  {
-    CurrencyDetails? currency = _currencies.FirstOrDefault(x =>
-      x.CurrencyCode == currencyCode);
-    return currency ?? CurrencyDetails.None;
-  }
+  public CurrencyDetails FindCurrency(string currencyCode) => _currencies
+      .FirstOrDefault(x => x.CurrencyCode == currencyCode)
+        ?? CurrencyDetails.None;
 }

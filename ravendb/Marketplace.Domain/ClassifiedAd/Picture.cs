@@ -4,13 +4,20 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public class Picture : Entity<PictureId>
 {
-  public ClassifiedAdId? ParentId { get; private set; }
-
-  public PictureSize Size { get; private set; } = new PictureSize
+  public static readonly Picture None = new()
   {
-    Height = 600,
-    Width = 800,
+    Id = PictureId.None,
+    ParentId = ClassifiedAdId.None,
+    Size = PictureSize.None,
+    Location = string.Empty,
+    OrderId = default,
   };
+
+  public ClassifiedAdId ParentId { get; private set; }
+    = ClassifiedAdId.None;
+
+  public PictureSize Size { get; private set; }
+    = PictureSize.None;
 
   public string Location { get; private set; } = string.Empty;
 
@@ -20,6 +27,10 @@ public class Picture : Entity<PictureId>
   {
   }
 
+  /// <summary>
+  /// Ctor used for reapplying events from aggregate root and satisfies
+  /// serialization requirements.
+  /// </summary>
   internal Picture() { }
 
   protected override void When(object @event)
@@ -28,14 +39,16 @@ public class Picture : Entity<PictureId>
     {
       case Events.PictureAddedToClassifiedAd e:
         ParentId = new ClassifiedAdId(e.ClassifiedAdId);
-        Id = new PictureId(e.PictureId);
+        Id = new PictureId { Value = e.PictureId };
         Location = e.Url;
         Size = new PictureSize { Height = e.Height, Width = e.Width };
         OrderId = e.OrderId;
         break;
+
       case Events.ClassifiedAdPictureResized e:
         Size = new PictureSize { Height = e.Height, Width = e.Width };
         break;
+
       default:
         return;
     }
@@ -44,8 +57,8 @@ public class Picture : Entity<PictureId>
   public void Resize(PictureSize newSize) =>
     Apply(new Events.ClassifiedAdPictureResized
     (
-      ClassifiedAdId: ParentId!.Value,
-      PictureId: Id!,
+      ClassifiedAdId: ParentId.Value,
+      PictureId: Id.Value,
       Height: newSize.Height,
       Width: newSize.Width
     ));

@@ -5,9 +5,9 @@ namespace Marketplace.Domain.UserProfile;
 
 public class UserProfile : AggregateRoot<UserId>
 {
-  public FullName FullName { get; private set; } = new(string.Empty);
+  public FullName FullName { get; private set; } = FullName.None;
 
-  public DisplayName DisplayName { get; private set; } = new(string.Empty);
+  public DisplayName DisplayName { get; private set; } = DisplayName.None;
 
   public string PhotoUrl { get; private set; } = string.Empty;
 
@@ -21,16 +21,27 @@ public class UserProfile : AggregateRoot<UserId>
     => Apply(new Events.UserRegistered(id, fullName, displayName));
 
   public void UpdateFullName(FullName newFullName)
-    => Apply(new Events.UserFullNameUpdated(Id!, newFullName));
+    => Apply(new Events.UserFullNameUpdated(Id, newFullName));
 
   public void UpdateDisplayName(DisplayName newDisplayName)
-    => Apply(new Events.UserDisplayNameUpdated(Id!, newDisplayName));
+    => Apply(new Events.UserDisplayNameUpdated(Id, newDisplayName));
 
   public void UpdateProfilePhoto(Uri newPhotoUrl)
-    => Apply(new Events.ProfilePhotoUploaded(Id!, newPhotoUrl.ToString()));
+    => Apply(new Events.ProfilePhotoUploaded(Id, newPhotoUrl.ToString()));
 
   protected override void EnsureValidState()
   {
+    bool valid =
+      Id != UserId.None
+      && FullName != FullName.None
+      && DisplayName != DisplayName.None
+      && PhotoUrl != string.Empty;
+
+    if (!valid)
+    {
+      throw new DomainExceptions.InvalidEntityStateException(
+        this, "Post-checks failed");
+    }
   }
 
   protected override void When(object @event)
@@ -38,19 +49,23 @@ public class UserProfile : AggregateRoot<UserId>
     switch (@event)
     {
       case Events.UserRegistered e:
-        Id = new UserId(e.UserId);
+        Id = new UserId { Value = e.UserId };
         FullName = new FullName(e.FullName);
         DisplayName = new DisplayName(e.DisplayName);
         break;
+
       case Events.UserFullNameUpdated e:
         FullName = new FullName(e.FullName);
         break;
+
       case Events.UserDisplayNameUpdated e:
         DisplayName = new DisplayName(e.DisplayName);
         break;
+
       case Events.ProfilePhotoUploaded e:
         PhotoUrl = e.PhotoUrl;
         break;
+
       default:
         return;
     }

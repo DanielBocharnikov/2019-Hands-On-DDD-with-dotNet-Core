@@ -11,39 +11,15 @@ public class FakeCurrencyLookup : ICurrencyLookup
   private static readonly IEnumerable<CurrencyDetails> _currencies =
     new[]
     {
-      new CurrencyDetails()
-      {
-        CurrencyCode = "EUR",
-        DecimalPlaces = 2,
-        InUse = true,
-      },
-      new CurrencyDetails()
-      {
-        CurrencyCode = "USD",
-        DecimalPlaces = 2,
-        InUse = true,
-      },
-      new CurrencyDetails()
-      {
-        CurrencyCode = "JPY",
-        DecimalPlaces = 0,
-        InUse = true,
-      },
-      new CurrencyDetails()
-      {
-        CurrencyCode = "DEM",
-        DecimalPlaces = 2,
-        InUse = false,
-      },
+      new CurrencyDetails(currencyCode: "EUR", inUse: true, decimalPlaces: 2),
+      new CurrencyDetails(currencyCode: "USD", inUse: true, decimalPlaces: 2),
+      new CurrencyDetails(currencyCode: "JPY", inUse: true, decimalPlaces: 0),
+      new CurrencyDetails(currencyCode: "DEM", inUse: false, decimalPlaces: 2),
     };
 
-  public CurrencyDetails FindCurrency(string currencyCode)
-  {
-    CurrencyDetails? currency = _currencies.FirstOrDefault(x =>
-      x.CurrencyCode == currencyCode);
-
-    return currency ?? CurrencyDetails.None;
-  }
+  public CurrencyDetails FindCurrency(string currencyCode) => _currencies
+    .FirstOrDefault(x => x.CurrencyCode == currencyCode)
+      ?? CurrencyDetails.None;
 }
 
 public class MoneyTest

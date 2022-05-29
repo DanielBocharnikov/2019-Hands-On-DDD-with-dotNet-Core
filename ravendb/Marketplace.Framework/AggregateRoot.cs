@@ -8,7 +8,7 @@ namespace Marketplace.Framework
   {
     private readonly List<object> _changes;
 
-    public TId? Id { get; protected set; }
+    public TId Id { get; protected set; } = default!;
 
     protected AggregateRoot() => _changes = new List<object>();
 

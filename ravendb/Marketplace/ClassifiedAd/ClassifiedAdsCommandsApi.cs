@@ -35,6 +35,16 @@ public class ClassifiedAdsCommandsApi : ControllerBase
   public async Task<IActionResult> Put(V1.UpdatePrice request) =>
     await HandleRequest(request, _appService.Handle);
 
+  [Route("addpicture")]
+  [HttpPut]
+  public async Task<IActionResult> Put(V1.AddPicture request) =>
+    await HandleRequest(request, _appService.Handle);
+
+  [Route("resizepicture")]
+  [HttpPut]
+  public async Task<IActionResult> Put(V1.ResizePicture request) =>
+    await HandleRequest(request, _appService.Handle);
+
   [Route("requestpublish")]
   [HttpPut]
   public async Task<IActionResult> Put(V1.RequestToPublish request) =>

@@ -2,6 +2,12 @@ namespace Marketplace.Domain;
 
 public sealed class Price : Money
 {
+  public static readonly Price NoPrice = new()
+  {
+    Amount = -1,
+    Currency = CurrencyDetails.None
+  };
+
   public static new Price FromDecimal(
     decimal amount, string currencyCode, ICurrencyLookup currencyLookup)
   {
@@ -15,8 +21,6 @@ public sealed class Price : Money
 
     return new(amount, currencyCode, currencyLookup);
   }
-
-  public static Price NoPrice = new();
 
   private Price()
   {

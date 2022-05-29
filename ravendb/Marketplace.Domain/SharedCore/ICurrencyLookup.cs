@@ -9,16 +9,27 @@ public interface ICurrencyLookup
 
 public class CurrencyDetails : ValueObject
 {
-  public string CurrencyCode { get; set; } = string.Empty;
-  public bool InUse { get; set; }
-  public int DecimalPlaces { get; set; }
+  public string CurrencyCode { get; private set; } = string.Empty;
+  public bool InUse { get; private set; }
+  public int DecimalPlaces { get; private set; }
 
   public static CurrencyDetails None => new()
   {
     CurrencyCode = string.Empty,
     InUse = false,
-    DecimalPlaces = 0
+    DecimalPlaces = default
   };
+
+  public CurrencyDetails(string currencyCode, bool inUse, int decimalPlaces)
+  {
+    CurrencyCode = currencyCode;
+    InUse = inUse;
+    DecimalPlaces = decimalPlaces;
+  }
+
+  private CurrencyDetails()
+  {
+  }
 
   protected override IEnumerable<object?> GetEqualityComponents()
   {

@@ -4,7 +4,9 @@ namespace Marketplace.Domain.UserProfile;
 
 public sealed class FullName : ValueObject
 {
-  public string? Value { get; init; }
+  public static FullName None => new() { };
+
+  public string Value { get; init; } = string.Empty;
 
   internal FullName(string value) => Value = value;
 

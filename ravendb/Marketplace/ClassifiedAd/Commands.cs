@@ -15,6 +15,14 @@ public static class Commands
       decimal Price,
       string CurrencyCode);
 
+    public record class AddPicture(
+      Guid Id,
+      string PictureUrl,
+      int Height,
+      int Width);
+
+    public record class ResizePicture(Guid Id, Guid PictureId, int Height, int Width);
+
     public record class RequestToPublish(Guid Id);
 
     public record class Publish(Guid Id, Guid ApprovedBy);

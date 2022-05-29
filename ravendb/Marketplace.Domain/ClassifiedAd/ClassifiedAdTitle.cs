@@ -6,9 +6,20 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public sealed class ClassifiedAdTitle : ValueObject
 {
-  public string Value { get; init; } = string.Empty;
+  public static readonly ClassifiedAdTitle None = new(string.Empty);
+
+  public string Value { get; internal set; } = string.Empty;
 
   private static readonly Regex _regex = new("<.*?>");
+
+  internal ClassifiedAdTitle(string value) => Value = value;
+
+  /// <summary>
+  /// Satisfies serialization requirements.
+  /// </summary>
+  private ClassifiedAdTitle()
+  {
+  }
 
   public static ClassifiedAdTitle FromString(string title)
   {
@@ -28,10 +39,17 @@ public sealed class ClassifiedAdTitle : ValueObject
 
     CheckValidity(value);
 
-    return new ClassifiedAdTitle(value);
+    return new(value);
   }
 
-  internal ClassifiedAdTitle(string value) => Value = value;
+  public static implicit operator string(ClassifiedAdTitle self) => self.Value;
+
+  public static implicit operator ClassifiedAdTitle(string title) => new(title);
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return Value;
+  }
 
   private static void CheckValidity(string value)
   {
@@ -43,17 +61,4 @@ public sealed class ClassifiedAdTitle : ValueObject
       );
     }
   }
-
-  public static implicit operator string(ClassifiedAdTitle self) =>
-    self.Value;
-
-  public static implicit operator ClassifiedAdTitle(string title) =>
-    new(title);
-
-  protected override IEnumerable<object> GetEqualityComponents()
-  {
-    yield return Value;
-  }
-
-  private ClassifiedAdTitle() { }
 }

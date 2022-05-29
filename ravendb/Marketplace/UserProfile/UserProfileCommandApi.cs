@@ -15,21 +15,21 @@ public class UserProfileCommandApi : ControllerBase
   public UserProfileCommandApi(UserProfileApplicationService applicationService) => _applicationService = applicationService;
 
   [HttpPost]
-  public Task<IActionResult> Post(Contracts.V1.RegisterUser request)
+  public Task<IActionResult> Post(Commands.V1.RegisterUser request)
     => RequestHandler.HandleCommand(request, _applicationService.Handle, _log);
 
   [HttpPut]
   [Route("fullname")]
-  public Task<IActionResult> Put(Contracts.V1.UpdateUserFullName request)
+  public Task<IActionResult> Put(Commands.V1.UpdateUserFullName request)
     => RequestHandler.HandleCommand(request, _applicationService.Handle, _log);
 
   [HttpPut]
   [Route("displayname")]
-  public Task<IActionResult> Put(Contracts.V1.UpdateUserDisplayName request)
+  public Task<IActionResult> Put(Commands.V1.UpdateUserDisplayName request)
     => RequestHandler.HandleCommand(request, _applicationService.Handle, _log);
 
   [HttpPut]
   [Route("photo")]
-  public Task<IActionResult> Put(Contracts.V1.UpdateUserProfilePhoto request)
+  public Task<IActionResult> Put(Commands.V1.UpdateUserProfilePhoto request)
     => RequestHandler.HandleCommand(request, _applicationService.Handle, _log);
 }

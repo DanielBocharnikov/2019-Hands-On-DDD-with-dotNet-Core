@@ -4,7 +4,9 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public class ClassifiedAdId : ValueObject
 {
-  public Guid Value { get; init; }
+  public static ClassifiedAdId None => new() { Value = Guid.Empty };
+
+  public Guid Value { get; internal set; }
 
   public ClassifiedAdId(Guid value)
   {
@@ -19,9 +21,12 @@ public class ClassifiedAdId : ValueObject
     Value = value;
   }
 
-  protected override IEnumerable<object> GetEqualityComponents()
+  /// <summary>
+  /// Ctor used for reapplying events from aggregate root and satisfies
+  /// serialization requirements.
+  /// </summary>
+  internal ClassifiedAdId()
   {
-    yield return Value;
   }
 
   public static implicit operator Guid(ClassifiedAdId self)
@@ -31,4 +36,9 @@ public class ClassifiedAdId : ValueObject
     => new(Guid.Parse(value));
 
   public override string ToString() => Value.ToString();
+
+  protected override IEnumerable<object> GetEqualityComponents()
+  {
+    yield return Value;
+  }
 }

@@ -6,6 +6,7 @@ namespace Marketplace.Domain.SharedCore;
 public class Money : ValueObject
 {
   public decimal Amount { get; init; }
+
   public CurrencyDetails Currency { get; init; } = CurrencyDetails.None;
 
   public const string DEFAULTCURRENCY = "EUR";
@@ -13,14 +14,14 @@ public class Money : ValueObject
   public static Money FromDecimal(
     decimal amount,
     string currencyCode,
-    ICurrencyLookup currencyLookup) =>
-      new(amount, currencyCode, currencyLookup);
+    ICurrencyLookup currencyLookup)
+      => new(amount, currencyCode, currencyLookup);
 
   public static Money FromString(
     string amount,
     string currencyCode,
-    ICurrencyLookup currencyLookup) =>
-      new(Convert.ToDecimal(amount, new CultureInfo("en-US")),
+    ICurrencyLookup currencyLookup)
+      => new(Convert.ToDecimal(amount, new CultureInfo("en-US")),
         currencyCode, currencyLookup);
 
   protected Money(
@@ -31,8 +32,8 @@ public class Money : ValueObject
     if (string.IsNullOrEmpty(currencyCode))
     {
       throw new ArgumentNullException(
-      paramName: nameof(currencyCode),
-      message: "Currency code must be specified"
+        paramName: nameof(currencyCode),
+        message: "Currency code must be specified"
       );
     }
 

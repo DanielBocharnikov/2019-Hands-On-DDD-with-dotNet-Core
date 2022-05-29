@@ -26,21 +26,46 @@ public class ClassifiedAdsApplicationService : IApplicationService
     {
       V1.Create cmd => HandleCreate(cmd),
 
-      V1.SetTitle cmd => HandleUpdate(cmd.Id, ad =>
-        ad.SetTitle(ClassifiedAdTitle.FromString(cmd.Title))),
+      V1.SetTitle cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.SetTitle(ClassifiedAdTitle.FromString(cmd.Title))
+      ),
 
-      V1.UpdateText cmd => HandleUpdate(cmd.Id, ad =>
-        ad.UpdateText(ClassifiedAdText.FromString(cmd.Text))),
+      V1.UpdateText cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.UpdateText(ClassifiedAdText.FromString(cmd.Text))
+      ),
 
-      V1.UpdatePrice cmd => HandleUpdate(cmd.Id, ad =>
-        ad.UpdatePrice(Price.FromDecimal(cmd.Price, cmd.CurrencyCode,
-          _currencyLookup))),
+      V1.UpdatePrice cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.UpdatePrice(
+          Price.FromDecimal(cmd.Price, cmd.CurrencyCode, _currencyLookup)
+        )
+      ),
 
-      V1.RequestToPublish cmd => HandleUpdate(cmd.Id, ad =>
-        ad.RequestToPublish()),
+      V1.AddPicture cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.AddPicture(
+          new Uri(cmd.PictureUrl),
+          new PictureSize(cmd.Height, cmd.Width)
+        )
+      ),
 
-      V1.Publish cmd => HandleUpdate(cmd.Id, c =>
-        c.Publish(new UserId(cmd.ApprovedBy))),
+      V1.ResizePicture cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.ResizePicture(
+          new PictureId(cmd.PictureId),
+          new PictureSize(cmd.Height, cmd.Width)
+        )
+      ),
+
+      V1.RequestToPublish cmd => HandleUpdate(
+        cmd.Id,
+        ad => ad.RequestToPublish()),
+
+      V1.Publish cmd => HandleUpdate(
+        cmd.Id,
+        c => c.Publish(new UserId(cmd.ApprovedBy))),
 
       _ => throw new InvalidOperationException(
           $"Command type {command.GetType().FullName} is unknown."

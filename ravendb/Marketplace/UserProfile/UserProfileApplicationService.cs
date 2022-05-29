@@ -21,7 +21,7 @@ public class UserProfileApplicationService : IApplicationService
   {
     switch (command)
     {
-      case Contracts.V1.RegisterUser cmd:
+      case Commands.V1.RegisterUser cmd:
         if (await _repository.Exists(cmd.UserId.ToString()))
         {
           throw new InvalidOperationException(
@@ -38,18 +38,18 @@ public class UserProfileApplicationService : IApplicationService
         await _repository.Add(userProfile);
         await _unitOfWork.Commit();
         break;
-      case Contracts.V1.UpdateUserFullName cmd:
+      case Commands.V1.UpdateUserFullName cmd:
         await HandleUpdate(cmd.UserId, profile =>
           profile.UpdateFullName(FullName.FromString(cmd.FullName)));
         break;
-      case Contracts.V1.UpdateUserDisplayName cmd:
+      case Commands.V1.UpdateUserDisplayName cmd:
         await HandleUpdate(cmd.UserId, profile =>
           profile.UpdateDisplayName(
             DisplayName.FromString(cmd.DisplayName, _checkText)
           )
         );
         break;
-      case Contracts.V1.UpdateUserProfilePhoto cmd:
+      case Commands.V1.UpdateUserProfilePhoto cmd:
         await HandleUpdate(cmd.UserId, profile =>
           profile.UpdateProfilePhoto(new Uri(cmd.PhotoUrl))
         );
