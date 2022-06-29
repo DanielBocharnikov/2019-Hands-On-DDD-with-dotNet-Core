@@ -43,7 +43,11 @@ WebApplication? app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
   _ = app.UseSwagger();
-  _ = app.UseSwaggerUI();
+  _ = app.UseSwaggerUI(options =>
+  {
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+  });
 }
 
 app.UseHttpsRedirection();

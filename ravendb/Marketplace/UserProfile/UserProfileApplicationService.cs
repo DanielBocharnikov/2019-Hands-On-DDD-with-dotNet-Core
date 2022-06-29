@@ -22,7 +22,7 @@ public class UserProfileApplicationService : IApplicationService
     switch (command)
     {
       case Commands.V1.RegisterUser cmd:
-        if (await _repository.Exists(cmd.UserId.ToString()))
+        if (await _repository.Exists((UserId)cmd.UserId))
         {
           throw new InvalidOperationException(
             $"Entity with id {cmd.UserId} already exists"
@@ -67,7 +67,7 @@ public class UserProfileApplicationService : IApplicationService
   )
   {
     Domain.UserProfile.UserProfile userProfile = await _repository
-      .Load(userProfileId.ToString());
+      .Load((UserId)userProfileId);
 
     if (userProfile is null)
     {

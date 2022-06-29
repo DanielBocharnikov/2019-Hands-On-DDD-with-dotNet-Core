@@ -13,11 +13,9 @@ public class Picture : Entity<PictureId>
     OrderId = default,
   };
 
-  public ClassifiedAdId ParentId { get; private set; }
-    = ClassifiedAdId.None;
+  public ClassifiedAdId ParentId { get; private set; } = ClassifiedAdId.None;
 
-  public PictureSize Size { get; private set; }
-    = PictureSize.None;
+  public PictureSize Size { get; private set; } = PictureSize.None;
 
   public string Location { get; private set; } = string.Empty;
 
@@ -54,8 +52,8 @@ public class Picture : Entity<PictureId>
     }
   }
 
-  public void Resize(PictureSize newSize) =>
-    Apply(new Events.ClassifiedAdPictureResized
+  public void Resize(PictureSize newSize) => Apply(
+    new Events.ClassifiedAdPictureResized
     (
       ClassifiedAdId: ParentId.Value,
       PictureId: Id.Value,

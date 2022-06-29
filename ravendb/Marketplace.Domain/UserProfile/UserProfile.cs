@@ -11,9 +11,13 @@ public class UserProfile : AggregateRoot<UserId>
 
   public string PhotoUrl { get; private set; } = string.Empty;
 
+  /// <summary>
+  /// Used by RavenDb
+  /// </summary>
+  /// <value></value>
   private string DbId
   {
-    get => $"UserProfile/{Id!.Value}";
+    get => $"UserProfile/{Id.Value}";
     set { }
   }
 
@@ -31,11 +35,9 @@ public class UserProfile : AggregateRoot<UserId>
 
   protected override void EnsureValidState()
   {
-    bool valid =
-      Id != UserId.None
+    bool valid = Id != UserId.None
       && FullName != FullName.None
-      && DisplayName != DisplayName.None
-      && PhotoUrl != string.Empty;
+      && DisplayName != DisplayName.None;
 
     if (!valid)
     {

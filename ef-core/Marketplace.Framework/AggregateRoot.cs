@@ -8,7 +8,9 @@ namespace Marketplace.Framework
   {
     private readonly List<object> _changes;
 
-    public TId? Id { get; protected set; }
+    public TId Id { get; protected set; } = default!;
+
+    public int Version { get; private set; } = -1;
 
     protected AggregateRoot() => _changes = new List<object>();
 
@@ -21,11 +23,14 @@ namespace Marketplace.Framework
       When(@event);
       EnsureValidState();
       _changes.Add(@event);
+      IncreaseVersion();
     }
 
     protected abstract void When(object @event);
 
     protected abstract void EnsureValidState();
+
+    protected void IncreaseVersion() => Version++;
 
     protected void ApplyToEntity(IInternalEventHandler entity, object @event) =>
       entity?.Handle(@event);

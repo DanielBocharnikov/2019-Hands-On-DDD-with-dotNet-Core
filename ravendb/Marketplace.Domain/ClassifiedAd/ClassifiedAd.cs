@@ -7,18 +7,15 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
   public UserId OwnerId { get; private set; } = UserId.None;
 
-  public ClassifiedAdTitle Title { get; private set; }
-    = ClassifiedAdTitle.None;
+  public ClassifiedAdTitle Title { get; private set; } = ClassifiedAdTitle.None;
 
-  public ClassifiedAdText Text { get; private set; }
-    = ClassifiedAdText.None;
+  public ClassifiedAdText Text { get; private set; } = ClassifiedAdText.None;
 
   public Price Price { get; private set; } = Price.None;
 
   public IEnumerable<Picture> Pictures => _pictures.AsEnumerable();
 
-  public Picture FirstPicture => Pictures
-    .OrderBy(x => x.OrderId)
+  public Picture FirstPicture => Pictures.OrderBy(x => x.OrderId)
     .FirstOrDefault() ?? Picture.None;
 
   public ClassifiedAdState State { get; private set; }
@@ -38,19 +35,20 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   /// </summary>
   private string DbId
   {
-    get => $"ClassifiedAd/{Id!.Value}";
+    get => $"ClassifiedAd/{Id.Value}";
     set { }
   }
+
   private readonly List<Picture> _pictures = new();
 
-  public ClassifiedAd(ClassifiedAdId id, UserId ownerId) =>
-    Apply(new Events.ClassifiedAdCreated(Id: id, OwnerId: ownerId));
+  public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
+    => Apply(new Events.ClassifiedAdCreated(Id: id, OwnerId: ownerId));
 
-  public void SetTitle(ClassifiedAdTitle title) =>
-    Apply(new Events.ClassifiedAdTitleChanged(Id: Id, Title: title));
+  public void SetTitle(ClassifiedAdTitle title)
+    => Apply(new Events.ClassifiedAdTitleChanged(Id: Id, Title: title));
 
-  public void UpdateText(ClassifiedAdText text) =>
-    Apply(new Events.ClassifiedAdTextUpdated(Id: Id, Text: text));
+  public void UpdateText(ClassifiedAdText text)
+    => Apply(new Events.ClassifiedAdTextUpdated(Id: Id, Text: text));
 
   public void UpdatePrice(Price price) =>
     Apply(
@@ -90,8 +88,8 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
     picture.Resize(newSize);
   }
 
-  public void RequestToPublish() =>
-    Apply(new Events.ClassifiedAdSentToReview(Id: Id));
+  public void RequestToPublish()
+    => Apply(new Events.ClassifiedAdSentToReview(Id: Id));
 
   public void Publish(UserId userId)
     => Apply(new Events.ClassifiedAdPublished(
@@ -145,9 +143,7 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
   protected override void EnsureValidState()
   {
-    bool valid =
-      Id != ClassifiedAdId.None
-      && OwnerId != UserId.None
+    bool valid = Id != ClassifiedAdId.None && OwnerId != UserId.None
       && (State switch
       {
         ClassifiedAdState.PendingReview =>
@@ -180,12 +176,11 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
     if (!valid)
     {
-      throw new DomainExceptions.InvalidEntityStateException(
-        this,
+      throw new DomainExceptions.InvalidEntityStateException(this,
         $"Post-checks failed in state {State}");
     }
   }
 
-  private Picture FindPicture(PictureId id) =>
-    _pictures.Find(x => x.Id == id) ?? Picture.None;
+  private Picture FindPicture(PictureId id)
+    => _pictures.Find(x => x.Id == id) ?? Picture.None;
 }

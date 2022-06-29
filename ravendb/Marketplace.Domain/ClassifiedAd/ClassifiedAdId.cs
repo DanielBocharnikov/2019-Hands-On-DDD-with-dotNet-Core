@@ -4,6 +4,10 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public class ClassifiedAdId : ValueObject
 {
+  /// <summary>
+  /// Factory method to represent that ClassifiedAdId is absent.
+  /// </summary>
+  /// <returns></returns>
   public static ClassifiedAdId None => new() { Value = Guid.Empty };
 
   public Guid Value { get; internal set; }
@@ -12,8 +16,7 @@ public class ClassifiedAdId : ValueObject
   {
     if (value == default)
     {
-      throw new ArgumentNullException(
-        paramName: nameof(value),
+      throw new ArgumentNullException(paramName: nameof(value),
         message: "Classified Ad identity cannot be empty"
       );
     }
@@ -32,7 +35,10 @@ public class ClassifiedAdId : ValueObject
   public static implicit operator Guid(ClassifiedAdId self)
     => self.Value;
 
-  public static implicit operator ClassifiedAdId(string value)
+  public static explicit operator ClassifiedAdId(Guid value)
+  => new(value);
+
+  public static explicit operator ClassifiedAdId(string value)
     => new(Guid.Parse(value));
 
   public override string ToString() => Value.ToString();

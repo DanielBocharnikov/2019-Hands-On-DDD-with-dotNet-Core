@@ -74,7 +74,7 @@ public class ClassifiedAdsApplicationService : IApplicationService
 
   private async Task HandleCreate(V1.Create cmd)
   {
-    if (await _repository.Exists(cmd.Id.ToString()))
+    if (await _repository.Exists((ClassifiedAdId)cmd.Id))
     {
       throw new InvalidOperationException($"Entity with id {cmd.Id}," +
         " already exists");
@@ -94,7 +94,7 @@ public class ClassifiedAdsApplicationService : IApplicationService
     Action<Domain.ClassifiedAd.ClassifiedAd> operation)
   {
     Domain.ClassifiedAd.ClassifiedAd? classifiedAd
-      = await _repository.Load(classifiedAdId.ToString());
+      = await _repository.Load((ClassifiedAdId)classifiedAdId);
 
     if (classifiedAd == null)
     {
