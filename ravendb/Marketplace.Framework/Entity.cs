@@ -5,16 +5,20 @@ namespace Marketplace.Framework
   public abstract class Entity<TId> : IInternalEventHandler
     where TId : ValueObject
   {
-    private readonly Action<object> _applier;
+    public TId Id { get; protected set; } = default!;
 
-    public TId? Id { get; protected set; }
+    private readonly Action<object>? _applier;
 
     protected Entity(Action<object> applier) => _applier = applier;
+
+    protected Entity()
+    {
+    }
 
     protected void Apply(object @event)
     {
       When(@event);
-      _applier(@event);
+      _applier?.Invoke(@event);
     }
 
     void IInternalEventHandler.Handle(object @event) => When(@event);

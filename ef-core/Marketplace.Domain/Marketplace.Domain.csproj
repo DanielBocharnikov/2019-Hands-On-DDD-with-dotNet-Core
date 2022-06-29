@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Marketplace.Framework\Marketplace.Framework.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <ProduceReferenceAssemblyInOutDir>true</ProduceReferenceAssemblyInOutDir>
+  </PropertyGroup>
+
 </Project>

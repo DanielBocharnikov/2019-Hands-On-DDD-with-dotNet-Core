@@ -1,6 +1,8 @@
 using System;
-using Marketplace.Domain;
+using Marketplace.Domain.ClassifiedAd;
+using Marketplace.Domain.SharedCore;
 using Xunit;
+using static Marketplace.Domain.SharedCore.DomainExceptions;
 
 namespace Marketplace.Tests;
 
