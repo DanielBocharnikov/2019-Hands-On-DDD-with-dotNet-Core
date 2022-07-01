@@ -10,7 +10,18 @@ namespace Marketplace.Framework
 
     public TId Id { get; protected set; } = default!;
 
+    public int Version { get; private set; } = -1;
+
     protected AggregateRoot() => _changes = new List<object>();
+
+    public void Load(IEnumerable<object> history)
+    {
+      foreach (object @event in history)
+      {
+        When(@event);
+        Version++;
+      }
+    }
 
     public IEnumerable<object> GetChanges() => _changes.AsEnumerable();
 
