@@ -60,6 +60,8 @@ public class EsAggregateStore : IAggregateStore
 
       return JsonConvert.DeserializeObject(jsonData, dataType!);
     }).ToArray()!);
+
+    return aggregate;
   }
 
   public async Task Save<T, TId>(T aggregate)
