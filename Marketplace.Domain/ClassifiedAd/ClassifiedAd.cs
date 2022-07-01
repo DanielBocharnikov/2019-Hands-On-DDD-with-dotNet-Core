@@ -30,15 +30,6 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
     MarkedAsSold = 3
   }
 
-  /// <summary>
-  /// Used by RavenDb
-  /// </summary>
-  private string DbId
-  {
-    get => $"ClassifiedAd/{Id.Value}";
-    set { }
-  }
-
   private readonly List<Picture> _pictures = new();
 
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId)

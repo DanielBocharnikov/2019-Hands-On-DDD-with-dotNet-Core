@@ -9,7 +9,6 @@ public sealed class ClassifiedAdTitle : ValueObject
   /// <summary>
   /// Factory method to represent that ClassifiedAdTitle is absent.
   /// </summary>
-  /// <returns></returns>
   public static readonly ClassifiedAdTitle None = new(string.Empty);
 
   public string Value { get; internal set; } = string.Empty;
@@ -59,7 +58,7 @@ public sealed class ClassifiedAdTitle : ValueObject
 
   /// <summary>
   /// Not every string can be ClassifiedAdTitle, so we use explicit convertion
-  /// operation, and underhood we using factory method to validate string.
+  /// operation, and under the hood we using factory method to validate string.
   /// </summary>
   /// <param name="title"></param>
   public static explicit operator ClassifiedAdTitle(string title)

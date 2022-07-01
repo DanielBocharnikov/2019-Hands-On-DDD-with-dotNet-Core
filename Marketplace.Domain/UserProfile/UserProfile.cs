@@ -11,16 +11,6 @@ public class UserProfile : AggregateRoot<UserId>
 
   public string PhotoUrl { get; private set; } = string.Empty;
 
-  /// <summary>
-  /// Used by RavenDb
-  /// </summary>
-  /// <value></value>
-  private string DbId
-  {
-    get => $"UserProfile/{Id.Value}";
-    set { }
-  }
-
   public UserProfile(UserId id, FullName fullName, DisplayName displayName)
     => Apply(new Events.UserRegistered(id, fullName, displayName));
 

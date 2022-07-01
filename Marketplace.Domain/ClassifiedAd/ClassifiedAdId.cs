@@ -7,7 +7,6 @@ public class ClassifiedAdId : ValueObject
   /// <summary>
   /// Factory method to represent that ClassifiedAdId is absent.
   /// </summary>
-  /// <returns></returns>
   public static ClassifiedAdId None => new() { Value = Guid.Empty };
 
   public Guid Value { get; internal set; }
