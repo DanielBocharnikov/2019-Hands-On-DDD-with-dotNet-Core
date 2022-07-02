@@ -1,12 +1,8 @@
 using EventStore.ClientAPI;
 using Marketplace;
 using Marketplace.ClassifiedAd;
-using Marketplace.Domain.SharedCore;
-using Marketplace.Domain.UserProfile;
-using Marketplace.Framework;
 using Marketplace.Infrastructure;
 using Marketplace.UserProfile;
-using static System.Reflection.Assembly;
 
 WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 {
@@ -44,7 +40,8 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
   PurgomalumClient purgomalumClient = new();
 
   _ = builder.Services.AddSingleton(new UserProfileApplicationService(
-    store, text => purgomalumClient.CheckForProfanity(text)));
+    store,
+    text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
 
   _ = builder.Services
     .AddSingleton<BackgroundService, EventStoreConnectionService>();
