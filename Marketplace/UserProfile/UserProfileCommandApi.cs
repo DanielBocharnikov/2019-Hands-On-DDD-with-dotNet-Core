@@ -12,7 +12,8 @@ public class UserProfileCommandApi : ControllerBase
   private static readonly Serilog.ILogger _log
     = Serilog.Log.ForContext<UserProfileCommandApi>();
 
-  public UserProfileCommandApi(UserProfileApplicationService applicationService) => _applicationService = applicationService;
+  public UserProfileCommandApi(UserProfileApplicationService applicationService)
+      => _applicationService = applicationService;
 
   [HttpPost]
   public Task<IActionResult> Post(Commands.V1.RegisterUser request)

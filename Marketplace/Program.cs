@@ -4,16 +4,11 @@ using Marketplace;
 using Marketplace.ClassifiedAd;
 using Marketplace.Infrastructure;
 using Marketplace.UserProfile;
+using Serilog;
 using static System.Reflection.Assembly;
 
 string currentDirectory = Path.GetDirectoryName(
    GetEntryAssembly()?.Location)!;
-
-// IConfigurationRoot config = new ConfigurationBuilder()
-//   .SetBasePath(currentDirectory)
-//   .AddJsonFile("appsettings.json", optional: false,
-//     reloadOnChange: false)
-//   .Build();
 
 WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   new WebApplicationOptions
@@ -23,7 +18,7 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   }
 );
 {
-  // _ = builder.WebHost.UseConfiguration(config);
+  _ = builder.Host.UseSerilog((_, lc) => lc.WriteTo.Console());
 
   _ = builder.Services.AddControllers();
   _ = builder.Services.AddEndpointsApiExplorer();
@@ -65,23 +60,35 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   _ = builder.Services.AddSingleton<IHostedService, HostedService>();
 }
 
-WebApplication? app = builder.Build();
+try
 {
-  if (app.Environment.IsDevelopment())
+  Log.Information("Starting web host");
+  WebApplication? app = builder.Build();
   {
-    _ = app.UseSwagger();
-    _ = app.UseSwaggerUI(options =>
+    if (app.Environment.IsDevelopment())
     {
-      options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-      options.RoutePrefix = string.Empty;
-    });
+      _ = app.UseSwagger();
+      _ = app.UseSwaggerUI(options =>
+      {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+      });
+    }
+
+    _ = app.UseHttpsRedirection();
+
+    _ = app.UseAuthorization();
+
+    _ = app.MapControllers();
+
+    app.Run();
   }
-
-  _ = app.UseHttpsRedirection();
-
-  _ = app.UseAuthorization();
-
-  _ = app.MapControllers();
-
-  app.Run();
+}
+catch (Exception ex)
+{
+  Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+  Log.CloseAndFlush();
 }
