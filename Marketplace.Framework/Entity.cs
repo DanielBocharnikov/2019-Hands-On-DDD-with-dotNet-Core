@@ -15,11 +15,7 @@ namespace Marketplace.Framework
     {
     }
 
-    protected void Apply(object @event)
-    {
-      When(@event);
-      _applier?.Invoke(@event);
-    }
+    protected void Apply(object @event) => _applier?.Invoke(@event);
 
     void IInternalEventHandler.Handle(object @event) => When(@event);
 

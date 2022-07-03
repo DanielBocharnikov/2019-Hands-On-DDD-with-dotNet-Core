@@ -32,6 +32,10 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
   private readonly List<Picture> _pictures = new();
 
+  private ClassifiedAd()
+  {
+  }
+
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
     => Apply(new Events.ClassifiedAdCreated(Id: id, OwnerId: ownerId));
 
@@ -113,9 +117,13 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
       case Events.PictureAddedToClassifiedAd e:
         picture = new Picture(Apply);
-        ApplyToEntity(picture, @event);
+        ApplyToEntity(picture, e);
         _pictures.Add(picture);
+        break;
 
+      case Events.ClassifiedAdPictureResized e:
+        picture = FindPicture((PictureId)e.PictureId);
+        ApplyToEntity(picture, e);
         break;
 
       case Events.ClassifiedAdSentToReview:

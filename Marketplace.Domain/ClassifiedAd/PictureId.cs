@@ -28,6 +28,12 @@ public sealed class PictureId : ValueObject
   {
   }
 
+  public static implicit operator Guid(PictureId self)
+    => self.Value;
+
+  public static explicit operator PictureId(Guid value)
+    => new(value);
+
   public static implicit operator string(PictureId self)
     => self.Value.ToString();
 

@@ -11,6 +11,10 @@ public class UserProfile : AggregateRoot<UserId>
 
   public string PhotoUrl { get; private set; } = string.Empty;
 
+  private UserProfile()
+  {
+  }
+
   public UserProfile(UserId id, FullName fullName, DisplayName displayName)
     => Apply(new Events.UserRegistered(id, fullName, displayName));
 

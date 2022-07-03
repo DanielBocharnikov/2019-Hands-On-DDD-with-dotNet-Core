@@ -1,32 +1,51 @@
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.SystemData;
 using Marketplace;
 using Marketplace.ClassifiedAd;
 using Marketplace.Infrastructure;
 using Marketplace.UserProfile;
+using static System.Reflection.Assembly;
 
-WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
+string currentDirectory = Path.GetDirectoryName(
+   GetEntryAssembly()?.Location)!;
+
+// IConfigurationRoot config = new ConfigurationBuilder()
+//   .SetBasePath(currentDirectory)
+//   .AddJsonFile("appsettings.json", optional: false,
+//     reloadOnChange: false)
+//   .Build();
+
+WebApplicationBuilder? builder = WebApplication.CreateBuilder(
+  new WebApplicationOptions
+  {
+    Args = args,
+    ContentRootPath = currentDirectory,
+  }
+);
 {
-  // string currentDirectory = Path.GetDirectoryName(
-  //  GetEntryAssembly()?.Location)!;
-
-  // IConfigurationRoot config = new ConfigurationBuilder()
-  //   .SetBasePath(currentDirectory)
-  //   .AddJsonFile("appsettings.development.json", optional: false,
-  //     reloadOnChange: false)
-  //   .Build();
-
-  // _ = builder.WebHost
-  //   .UseConfiguration(config)
-  //   .UseContentRoot(currentDirectory);
+  // _ = builder.WebHost.UseConfiguration(config);
 
   _ = builder.Services.AddControllers();
   _ = builder.Services.AddEndpointsApiExplorer();
   _ = builder.Services.AddSwaggerGen();
 
+  var credentials = new UserCredentials(
+    builder.Configuration["EventStore:UserName"],
+    builder.Configuration["EventStore:Password"]
+  );
+
+  ConnectionSettings connectionSettings = ConnectionSettings
+    .Create()
+    .SetDefaultUserCredentials(credentials)
+    .DisableTls()
+    .KeepReconnecting()
+    .SetHeartbeatTimeout(TimeSpan.FromMilliseconds(500))
+    .Build();
+
   IEventStoreConnection esConnection = EventStoreConnection.Create(
-    builder.Configuration["eventStore:connectionString"],
-    ConnectionSettings.Create().KeepReconnecting(),
-    builder.Environment.ApplicationName
+    connectionSettings,
+    new Uri(builder.Configuration["EventStore:Url"]),
+    builder.Configuration["EventStore:ConnectionName"]
   );
 
   EsAggregateStore store = new(esConnection);
@@ -43,8 +62,7 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
     store,
     text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
 
-  _ = builder.Services
-    .AddSingleton<BackgroundService, EventStoreConnectionService>();
+  _ = builder.Services.AddSingleton<IHostedService, HostedService>();
 }
 
 WebApplication? app = builder.Build();
