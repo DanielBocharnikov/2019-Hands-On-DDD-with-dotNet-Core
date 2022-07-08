@@ -10,9 +10,9 @@
       "request": "launch",
       "preLaunchTask": "build",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/Marketplace/bin/Debug/net6.0/Marketplace.dll",
+      "program": "${workspaceFolder}/in-memory/Marketplace/bin/Debug/net6.0/Marketplace.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/Marketplace",
+      "cwd": "${workspaceFolder}/in-memory/Marketplace",
       "stopAtEntry": false,
       // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
       // "serverReadyAction": {

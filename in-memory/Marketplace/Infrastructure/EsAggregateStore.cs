@@ -49,17 +49,8 @@ public class EsAggregateStore : IAggregateStore
     // 5. Calls the Load method of empty aggregate instance to recover the
     // aggregate state.
     // 6. Deserializes those raw events to a collection of domain events.
-    aggregate.Load(page.Events.Select(resolvedEvent =>
-    {
-      EventMetadata meta = JsonConvert.DeserializeObject<EventMetadata>(
-        Encoding.UTF8.GetString(resolvedEvent.Event.Metadata))!;
-
-      var dataType = Type.GetType(meta.ClrType);
-
-      string jsonData = Encoding.UTF8.GetString(resolvedEvent.Event.Data);
-
-      return JsonConvert.DeserializeObject(jsonData, dataType!);
-    }).ToArray()!);
+    aggregate.Load(page.Events.Select(
+      resolvedEvent => resolvedEvent.Deserialize()).ToArray());
 
     return aggregate;
   }
@@ -114,9 +105,4 @@ public class EsAggregateStore : IAggregateStore
 
   private static byte[] Serialize(object data)
     => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
-
-  private class EventMetadata
-  {
-    public string ClrType { get; set; } = string.Empty;
-  }
 }

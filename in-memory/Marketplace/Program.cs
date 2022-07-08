@@ -2,7 +2,9 @@ using EventStore.ClientAPI;
 using EventStore.ClientAPI.SystemData;
 using Marketplace;
 using Marketplace.ClassifiedAd;
+using Marketplace.Framework;
 using Marketplace.Infrastructure;
+using Marketplace.Projections;
 using Marketplace.UserProfile;
 using Serilog;
 using static System.Reflection.Assembly;
@@ -18,7 +20,9 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   }
 );
 {
-  _ = builder.Host.UseSerilog((_, lc) => lc.WriteTo.Console());
+  _ = builder.Host.UseSerilog((_, lc) => lc
+    .MinimumLevel.Debug()
+    .WriteTo.Console());
 
   _ = builder.Services.AddControllers();
   _ = builder.Services.AddEndpointsApiExplorer();
@@ -46,7 +50,7 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   EsAggregateStore store = new(esConnection);
 
   _ = builder.Services.AddSingleton(esConnection);
-  _ = builder.Services.AddSingleton(store);
+  _ = builder.Services.AddSingleton<IAggregateStore>(store);
 
   _ = builder.Services.AddSingleton(new ClassifiedAdsApplicationService(
     store, new FixedCurrencyLookup()));
@@ -57,7 +61,14 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
     store,
     text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
 
-  _ = builder.Services.AddSingleton<IHostedService, HostedService>();
+  var items = new List<ReadModels.ClassifiedAdDetails>();
+  _ = builder.Services
+    .AddSingleton<IEnumerable<ReadModels.ClassifiedAdDetails>>(items);
+
+  var subscription = new EsSubscription(esConnection, items);
+  _ = builder.Services.AddSingleton<IHostedService>(
+    new EventStoreService(esConnection, subscription)
+  );
 }
 
 try

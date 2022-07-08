@@ -12,6 +12,11 @@ namespace Marketplace.Framework
       Action<T> operation
     ) where T : AggregateRoot<TId> where TId : ValueObject
     {
+      if (service == null)
+      {
+        throw new ArgumentNullException(nameof(service));
+      }
+
       T aggregate = await store.Load<T, TId>(aggregateId);
 
       if (aggregate is null)
