@@ -1,55 +1,17 @@
-using EventStore.ClientAPI;
 using Marketplace.Domain.ClassifiedAd;
-using Marketplace.Projections;
+using Marketplace.Framework;
 
-namespace Marketplace.Infrastructure;
+namespace Marketplace.Projections;
 
-public class EsSubscription
+public class ClassifiedAdDetailsProjection : IProjection
 {
-  private static readonly Serilog.ILogger _log
-    = Serilog.Log.ForContext<EsSubscription>();
+  private readonly List<ReadModels.ClassifiedAdDetails> _items;
 
-  private readonly IEventStoreConnection _connection;
-  private readonly IList<ReadModels.ClassifiedAdDetails> _items;
-  private EventStoreAllCatchUpSubscription _subscription = default!;
+  public ClassifiedAdDetailsProjection(
+    List<ReadModels.ClassifiedAdDetails> items) => _items = items;
 
-  public EsSubscription(IEventStoreConnection connection, IList<ReadModels.ClassifiedAdDetails> items)
+  public Task Project(object @event)
   {
-    _connection = connection;
-    _items = items;
-  }
-
-  public void Start()
-  {
-    var settings = new CatchUpSubscriptionSettings(
-      maxLiveQueueSize: 2000,
-      readBatchSize: 500,
-      verboseLogging: _log.IsEnabled(Serilog.Events.LogEventLevel.Verbose),
-      resolveLinkTos: true,
-      subscriptionName: "try-out-subscription"
-    );
-
-    _subscription = _connection.SubscribeToAllFrom(
-      lastCheckpoint: Position.Start,
-      settings,
-      EventAppeared
-    );
-  }
-
-  private Task EventAppeared(
-    EventStoreCatchUpSubscription subscription,
-    ResolvedEvent resolvedEvent)
-  {
-    if (resolvedEvent.Event.EventType.Trim().Contains('$')
-      || resolvedEvent.OriginalStreamId.Trim().Contains('$'))
-    {
-      return Task.CompletedTask;
-    }
-
-    object @event = resolvedEvent.Deserialize();
-
-    _log.Debug("Projecting event {type}", @event.GetType().Name);
-
     switch (@event)
     {
       case Events.ClassifiedAdCreated e:
@@ -106,8 +68,8 @@ public class EsSubscription
   private void UpdateItem(Guid id,
     Func<ReadModels.ClassifiedAdDetails, ReadModels.ClassifiedAdDetails> update)
   {
-    ReadModels.ClassifiedAdDetails? item = _items.FirstOrDefault(x =>
-      x.ClassifiedAdId == id);
+    ReadModels.ClassifiedAdDetails? item = _items.Find(
+      x => x.ClassifiedAdId == id);
 
     if (item is null)
     {
@@ -122,10 +84,12 @@ public class EsSubscription
     Func<ReadModels.ClassifiedAdDetails, bool> query,
     Func<ReadModels.ClassifiedAdDetails, ReadModels.ClassifiedAdDetails> update)
   {
-    foreach (ReadModels.ClassifiedAdDetails? item in _items.Where(query))
+    var classifiedAdDetailsFilteredByOwnerId = _items.Where(query).ToList();
+
+    for (int i = 0; i < classifiedAdDetailsFilteredByOwnerId.Count; i++)
     {
-      ReadModels.ClassifiedAdDetails newItem = update(item);
-      ReassignItem(item, newItem);
+      ReadModels.ClassifiedAdDetails newItem = update(_items[i]);
+      ReassignItem(_items[i], newItem);
     }
   }
 
@@ -135,6 +99,4 @@ public class EsSubscription
     int itemIndex = _items.IndexOf(currentItem);
     _items[itemIndex] = newItem;
   }
-
-  public void Stop() => _subscription.Stop();
 }

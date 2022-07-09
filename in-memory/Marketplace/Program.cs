@@ -61,11 +61,21 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
     store,
     text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
 
-  var items = new List<ReadModels.ClassifiedAdDetails>();
-  _ = builder.Services
-    .AddSingleton<IEnumerable<ReadModels.ClassifiedAdDetails>>(items);
+  List<ReadModels.ClassifiedAdDetails> classifiedAdDetails = new();
 
-  var subscription = new EsSubscription(esConnection, items);
+  _ = builder.Services
+    .AddSingleton<IEnumerable<ReadModels.ClassifiedAdDetails>>(classifiedAdDetails);
+
+  List<ReadModels.UserDetails> userDetails = new();
+
+  _ = builder.Services
+    .AddSingleton<IEnumerable<ReadModels.UserDetails>>(userDetails);
+
+  var subscription = new ProjectionManager(
+    esConnection,
+    new ClassifiedAdDetailsProjection(classifiedAdDetails),
+    new UserProfileProjection(userDetails));
+
   _ = builder.Services.AddSingleton<IHostedService>(
     new EventStoreService(esConnection, subscription)
   );

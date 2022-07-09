@@ -13,11 +13,5 @@ public static class ReadModels
     string[] PhotoUrls
   );
 
-  public record PublicClassifiedAdListItem(
-    Guid ClassifiedAdId,
-    string Title,
-    decimal Price,
-    string CurrencyCode,
-    string PhotoUrl
-  );
+  public record UserDetails(Guid UserId, string DisplayName);
 }
