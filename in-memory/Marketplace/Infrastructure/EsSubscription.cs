@@ -1,3 +1,4 @@
+using System.Globalization;
 using EventStore.ClientAPI;
 using Marketplace.Domain.ClassifiedAd;
 using Marketplace.Projections;
@@ -40,8 +41,8 @@ public class EsSubscription
     EventStoreCatchUpSubscription subscription,
     ResolvedEvent resolvedEvent)
   {
-    if (resolvedEvent.Event.EventType.StartsWith(
-      "$", StringComparison.CurrentCultureIgnoreCase))
+    if (resolvedEvent.Event.EventType.Trim().Contains('$')
+      || resolvedEvent.OriginalStreamId.Trim().Contains('$'))
     {
       return Task.CompletedTask;
     }
@@ -53,33 +54,30 @@ public class EsSubscription
     switch (@event)
     {
       case Events.ClassifiedAdCreated e:
-        if (!_items.Any(i => i.ClassifiedAdId == e.Id))
-        {
-          _items.Add(new ReadModels.ClassifiedAdDetails(
-            ClassifiedAdId: e.Id,
-            Title: string.Empty,
-            Price: decimal.Zero,
-            CurrencyCode: string.Empty,
-            Description: string.Empty,
-            SellerDisplayName: string.Empty,
-            Array.Empty<string>()
-          ));
-        }
+        _items.Add(new ReadModels.ClassifiedAdDetails(
+          ClassifiedAdId: e.Id,
+          Title: string.Empty,
+          Price: decimal.Zero,
+          CurrencyCode: string.Empty,
+          Description: string.Empty,
+          SellerDisplayName: string.Empty,
+          Array.Empty<string>()
+        ));
         break;
 
       case Events.ClassifiedAdTitleChanged e:
-        UpdateItem(e.Id, ad => ad = ad with
+        UpdateItem(e.Id, ad => ad with
         {
           Title = e.Title
         });
         break;
 
       case Events.ClassifiedAdTextUpdated e:
-        UpdateItem(e.Id, ad => ad = ad with { Description = e.Text });
+        UpdateItem(e.Id, ad => ad with { Description = e.Text });
         break;
 
       case Events.ClassifiedAdPriceUpdated e:
-        UpdateItem(e.Id, ad => ad = ad with
+        UpdateItem(e.Id, ad => ad with
         {
           Price = e.Price,
           CurrencyCode = e.CurrencyCode
@@ -87,17 +85,9 @@ public class EsSubscription
         break;
 
       case Events.PictureAddedToClassifiedAd e:
-        UpdateItem(e.ClassifiedAdId, ad =>
+        UpdateItem(e.ClassifiedAdId, ad => ad with
         {
-          if (!ad.PhotoUrls.Any(x => x == e.Url))
-          {
-            ad = ad with
-            {
-              PhotoUrls = ad.PhotoUrls.Append(e.Url).ToArray()
-            };
-          }
-
-          return ad;
+          PhotoUrls = ad.PhotoUrls.Append(e.Url).ToArray()
         });
         break;
 
