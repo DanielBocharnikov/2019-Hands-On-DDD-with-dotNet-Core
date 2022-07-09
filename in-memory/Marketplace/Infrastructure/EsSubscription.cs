@@ -1,4 +1,3 @@
-using System.Globalization;
 using EventStore.ClientAPI;
 using Marketplace.Domain.ClassifiedAd;
 using Marketplace.Projections;
@@ -56,6 +55,7 @@ public class EsSubscription
       case Events.ClassifiedAdCreated e:
         _items.Add(new ReadModels.ClassifiedAdDetails(
           ClassifiedAdId: e.Id,
+          SellerId: e.OwnerId,
           Title: string.Empty,
           Price: decimal.Zero,
           CurrencyCode: string.Empty,
@@ -91,6 +91,11 @@ public class EsSubscription
         });
         break;
 
+      case Domain.UserProfile.Events.UserDisplayNameUpdated e:
+        UpdateMultipleItems(x => x.SellerId == e.UserId,
+          x => x with { SellerDisplayName = e.DisplayName });
+        break;
+
       default:
         return Task.CompletedTask;
     }
@@ -101,8 +106,8 @@ public class EsSubscription
   private void UpdateItem(Guid id,
     Func<ReadModels.ClassifiedAdDetails, ReadModels.ClassifiedAdDetails> update)
   {
-    ReadModels.ClassifiedAdDetails? item = _items
-      .FirstOrDefault(x => x.ClassifiedAdId == id);
+    ReadModels.ClassifiedAdDetails? item = _items.FirstOrDefault(x =>
+      x.ClassifiedAdId == id);
 
     if (item is null)
     {
@@ -110,8 +115,25 @@ public class EsSubscription
     }
 
     ReadModels.ClassifiedAdDetails newItem = update(item);
-    int index = _items.IndexOf(item);
-    _items[index] = newItem;
+    ReassignItem(currentItem: item, newItem: newItem);
+  }
+
+  private void UpdateMultipleItems(
+    Func<ReadModels.ClassifiedAdDetails, bool> query,
+    Func<ReadModels.ClassifiedAdDetails, ReadModels.ClassifiedAdDetails> update)
+  {
+    foreach (ReadModels.ClassifiedAdDetails? item in _items.Where(query))
+    {
+      ReadModels.ClassifiedAdDetails newItem = update(item);
+      ReassignItem(item, newItem);
+    }
+  }
+
+  private void ReassignItem(ReadModels.ClassifiedAdDetails currentItem,
+    ReadModels.ClassifiedAdDetails newItem)
+  {
+    int itemIndex = _items.IndexOf(currentItem);
+    _items[itemIndex] = newItem;
   }
 
   public void Stop() => _subscription.Stop();

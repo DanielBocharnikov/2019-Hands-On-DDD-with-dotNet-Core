@@ -4,6 +4,7 @@ public static class ReadModels
 {
   public record ClassifiedAdDetails(
     Guid ClassifiedAdId,
+    Guid SellerId,
     string Title,
     decimal Price,
     string CurrencyCode,
