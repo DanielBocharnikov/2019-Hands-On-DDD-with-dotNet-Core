@@ -1,20 +1,28 @@
 using Marketplace.Domain.ClassifiedAd;
 using Marketplace.Framework;
+using static Marketplace.Domain.ClassifiedAd.Events;
+using static Marketplace.Domain.UserProfile.Events;
 
 namespace Marketplace.Projections;
 
 public class ClassifiedAdDetailsProjection : IProjection
 {
   private readonly List<ReadModels.ClassifiedAdDetails> _items;
+  private readonly Func<Guid, string> _getUserDisplayName;
 
   public ClassifiedAdDetailsProjection(
-    List<ReadModels.ClassifiedAdDetails> items) => _items = items;
+    List<ReadModels.ClassifiedAdDetails> items,
+    Func<Guid, string> getUserDisplayName)
+  {
+    _items = items;
+    _getUserDisplayName = getUserDisplayName;
+  }
 
   public Task Project(object @event)
   {
     switch (@event)
     {
-      case Events.ClassifiedAdCreated e:
+      case ClassifiedAdCreated e:
         _items.Add(new ReadModels.ClassifiedAdDetails(
           ClassifiedAdId: e.Id,
           SellerId: e.OwnerId,
@@ -22,23 +30,23 @@ public class ClassifiedAdDetailsProjection : IProjection
           Price: decimal.Zero,
           CurrencyCode: string.Empty,
           Description: string.Empty,
-          SellerDisplayName: string.Empty,
+          SellerDisplayName: _getUserDisplayName(e.OwnerId),
           Array.Empty<string>()
         ));
         break;
 
-      case Events.ClassifiedAdTitleChanged e:
+      case ClassifiedAdTitleChanged e:
         UpdateItem(e.Id, ad => ad with
         {
           Title = e.Title
         });
         break;
 
-      case Events.ClassifiedAdTextUpdated e:
+      case ClassifiedAdTextUpdated e:
         UpdateItem(e.Id, ad => ad with { Description = e.Text });
         break;
 
-      case Events.ClassifiedAdPriceUpdated e:
+      case ClassifiedAdPriceUpdated e:
         UpdateItem(e.Id, ad => ad with
         {
           Price = e.Price,
@@ -46,14 +54,14 @@ public class ClassifiedAdDetailsProjection : IProjection
         });
         break;
 
-      case Events.PictureAddedToClassifiedAd e:
+      case PictureAddedToClassifiedAd e:
         UpdateItem(e.ClassifiedAdId, ad => ad with
         {
           PhotoUrls = ad.PhotoUrls.Append(e.Url).ToArray()
         });
         break;
 
-      case Domain.UserProfile.Events.UserDisplayNameUpdated e:
+      case UserDisplayNameUpdated e:
         UpdateMultipleItems(x => x.SellerId == e.UserId,
           x => x with { SellerDisplayName = e.DisplayName });
         break;

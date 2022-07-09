@@ -73,7 +73,10 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
 
   var subscription = new ProjectionManager(
     esConnection,
-    new ClassifiedAdDetailsProjection(classifiedAdDetails),
+    new ClassifiedAdDetailsProjection(
+      classifiedAdDetails,
+      userId => userDetails
+        .Find(x => x.UserId == userId)?.DisplayName ?? string.Empty),
     new UserProfileProjection(userDetails));
 
   _ = builder.Services.AddSingleton<IHostedService>(
