@@ -1,7 +1,5 @@
-using System.Text;
 using EventStore.ClientAPI;
 using Marketplace.Framework;
-using Newtonsoft.Json;
 
 namespace Marketplace.Infrastructure;
 
@@ -64,33 +62,11 @@ public class EsAggregateStore : IAggregateStore
       throw new ArgumentNullException(nameof(aggregate));
     }
 
-    EventData[] changes = aggregate.GetChanges()
-      .Select(@event =>
-        new EventData(
-          eventId: Guid.NewGuid(),
-          type: @event.GetType().Name,
-          isJson: true,
-          data: Serialize(@event),
-          metadata: Serialize(new EventMetadata
-          {
-            ClrType = @event.GetType().AssemblyQualifiedName!
-          })
-        )
-      )
-      .ToArray();
-
-    if (changes.Length == 0)
-    {
-      return;
-    }
-
     string streamName = GetStreamName<T, TId>(aggregate);
 
-    _ = await _connection.AppendToStreamAsync(
-      streamName,
-      aggregate.Version,
-      changes
-    );
+    object[] changes = aggregate.GetChanges().ToArray();
+
+    await _connection.AppendEvents(streamName, aggregate.Version, changes);
 
     aggregate.ClearChanges();
   }
@@ -102,7 +78,4 @@ public class EsAggregateStore : IAggregateStore
     where T : AggregateRoot<TId>
     where TId : ValueObject
       => $"{typeof(T).Name}-{aggregate.Id}";
-
-  private static byte[] Serialize(object data)
-    => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 }

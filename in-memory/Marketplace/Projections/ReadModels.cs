@@ -4,14 +4,15 @@ public static class ReadModels
 {
   public record ClassifiedAdDetails(
     Guid ClassifiedAdId,
-    Guid SellerId,
+    Guid SellersId,
+    string SellersDisplayName,
+    string SellersPhotoUrl,
     string Title,
     decimal Price,
     string CurrencyCode,
     string Description,
-    string SellerDisplayName,
     string[] PhotoUrls
   );
 
-  public record UserDetails(Guid UserId, string DisplayName);
+  public record UserDetails(Guid UserId, string DisplayName, string PhotoUrl);
 }

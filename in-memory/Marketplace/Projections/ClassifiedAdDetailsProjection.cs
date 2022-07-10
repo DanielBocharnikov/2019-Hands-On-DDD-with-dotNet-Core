@@ -1,7 +1,7 @@
-using Marketplace.Domain.ClassifiedAd;
 using Marketplace.Framework;
 using static Marketplace.Domain.ClassifiedAd.Events;
 using static Marketplace.Domain.UserProfile.Events;
+using static Marketplace.Projections.ClassifiedAdUpcastedEvents;
 
 namespace Marketplace.Projections;
 
@@ -25,13 +25,14 @@ public class ClassifiedAdDetailsProjection : IProjection
       case ClassifiedAdCreated e:
         _items.Add(new ReadModels.ClassifiedAdDetails(
           ClassifiedAdId: e.Id,
-          SellerId: e.OwnerId,
+          SellersId: e.OwnerId,
+          SellersDisplayName: _getUserDisplayName(e.OwnerId),
+          SellersPhotoUrl: string.Empty,
           Title: string.Empty,
           Price: decimal.Zero,
           CurrencyCode: string.Empty,
           Description: string.Empty,
-          SellerDisplayName: _getUserDisplayName(e.OwnerId),
-          Array.Empty<string>()
+          PhotoUrls: Array.Empty<string>()
         ));
         break;
 
@@ -62,8 +63,13 @@ public class ClassifiedAdDetailsProjection : IProjection
         break;
 
       case UserDisplayNameUpdated e:
-        UpdateMultipleItems(x => x.SellerId == e.UserId,
-          x => x with { SellerDisplayName = e.DisplayName });
+        UpdateMultipleItems(
+          x => x.SellersId == e.UserId,
+          x => x with { SellersDisplayName = e.DisplayName });
+        break;
+
+      case V1.ClassifiedAdPublished e:
+        UpdateItem(e.Id, ad => ad with { SellersPhotoUrl = e.SellersPhotoUrl });
         break;
 
       default:

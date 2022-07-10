@@ -1,4 +1,5 @@
 using Marketplace.Framework;
+using static Marketplace.Domain.ClassifiedAd.Events;
 
 namespace Marketplace.Domain.ClassifiedAd;
 
@@ -35,7 +36,7 @@ public class Picture : Entity<PictureId>
   {
     switch (@event)
     {
-      case Events.PictureAddedToClassifiedAd e:
+      case PictureAddedToClassifiedAd e:
         ParentId = new ClassifiedAdId(e.ClassifiedAdId);
         Id = new PictureId { Value = e.PictureId };
         Location = e.Url;
@@ -43,7 +44,7 @@ public class Picture : Entity<PictureId>
         OrderId = e.OrderId;
         break;
 
-      case Events.ClassifiedAdPictureResized e:
+      case ClassifiedAdPictureResized e:
         Size = new PictureSize { Height = e.Height, Width = e.Width };
         break;
 
@@ -53,7 +54,7 @@ public class Picture : Entity<PictureId>
   }
 
   public void Resize(PictureSize newSize) => Apply(
-    new Events.ClassifiedAdPictureResized
+    new ClassifiedAdPictureResized
     (
       ClassifiedAdId: ParentId.Value,
       PictureId: Id.Value,

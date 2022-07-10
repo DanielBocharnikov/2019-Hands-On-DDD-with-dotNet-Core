@@ -12,8 +12,7 @@ public class ProjectionManager
   private readonly IProjection[] _projections;
   private EventStoreAllCatchUpSubscription _subscription = default!;
 
-  public ProjectionManager(
-    IEventStoreConnection connection,
+  public ProjectionManager(IEventStoreConnection connection,
     params IProjection[] projections)
   {
     _connection = connection;
@@ -39,8 +38,7 @@ public class ProjectionManager
 
   public void Stop() => _subscription.Stop();
 
-  private Task EventAppeared(
-    EventStoreCatchUpSubscription subscription,
+  private Task EventAppeared(EventStoreCatchUpSubscription subscription,
     ResolvedEvent resolvedEvent)
   {
     if (resolvedEvent.Event.EventType.Trim().Contains('$'))

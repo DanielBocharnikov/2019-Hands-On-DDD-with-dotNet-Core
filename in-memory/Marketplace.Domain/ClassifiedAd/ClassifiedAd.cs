@@ -1,5 +1,6 @@
 using Marketplace.Domain.SharedCore;
 using Marketplace.Framework;
+using static Marketplace.Domain.ClassifiedAd.Events;
 
 namespace Marketplace.Domain.ClassifiedAd;
 
@@ -37,17 +38,17 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   }
 
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
-    => Apply(new Events.ClassifiedAdCreated(Id: id, OwnerId: ownerId));
+    => Apply(new ClassifiedAdCreated(Id: id, OwnerId: ownerId));
 
   public void SetTitle(ClassifiedAdTitle title)
-    => Apply(new Events.ClassifiedAdTitleChanged(Id: Id, Title: title));
+    => Apply(new ClassifiedAdTitleChanged(Id: Id, Title: title));
 
   public void UpdateText(ClassifiedAdText text)
-    => Apply(new Events.ClassifiedAdTextUpdated(Id: Id, Text: text));
+    => Apply(new ClassifiedAdTextUpdated(Id: Id, Text: text));
 
   public void UpdatePrice(Price price) =>
     Apply(
-      new Events.ClassifiedAdPriceUpdated(
+      new ClassifiedAdPriceUpdated(
         Id: Id,
         Price: price.Amount,
         CurrencyCode: price.Currency.CurrencyCode,
@@ -58,7 +59,7 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
   public void AddPicture(Uri pictureUri, PictureSize size)
   {
-    Apply(new Events.PictureAddedToClassifiedAd(
+    Apply(new PictureAddedToClassifiedAd(
       ClassifiedAdId: Id,
       PictureId: Guid.NewGuid(),
       Url: pictureUri.ToString(),
@@ -84,11 +85,12 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
   }
 
   public void RequestToPublish()
-    => Apply(new Events.ClassifiedAdSentToReview(Id: Id));
+    => Apply(new ClassifiedAdSentToReview(Id: Id));
 
   public void Publish(UserId userId)
-    => Apply(new Events.ClassifiedAdPublished(
+    => Apply(new ClassifiedAdPublished(
       Id: Id,
+      OwnerId: OwnerId,
       ApprovedBy: userId));
 
   protected override void When(object @event)
@@ -97,40 +99,40 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 
     switch (@event)
     {
-      case Events.ClassifiedAdCreated e:
+      case ClassifiedAdCreated e:
         Id = new ClassifiedAdId { Value = e.Id };
         OwnerId = new UserId { Value = e.OwnerId };
         State = ClassifiedAdState.Inactive;
         break;
 
-      case Events.ClassifiedAdTitleChanged e:
+      case ClassifiedAdTitleChanged e:
         Title = new ClassifiedAdTitle(e.Title);
         break;
 
-      case Events.ClassifiedAdTextUpdated e:
+      case ClassifiedAdTextUpdated e:
         Text = new ClassifiedAdText(e.Text);
         break;
 
-      case Events.ClassifiedAdPriceUpdated e:
+      case ClassifiedAdPriceUpdated e:
         Price = new Price(e.Price, e.CurrencyCode, e.InUse, e.DecimalPlaces);
         break;
 
-      case Events.PictureAddedToClassifiedAd e:
+      case PictureAddedToClassifiedAd e:
         picture = new Picture(Apply);
         ApplyToEntity(picture, e);
         _pictures.Add(picture);
         break;
 
-      case Events.ClassifiedAdPictureResized e:
+      case ClassifiedAdPictureResized e:
         picture = FindPicture((PictureId)e.PictureId);
         ApplyToEntity(picture, e);
         break;
 
-      case Events.ClassifiedAdSentToReview:
+      case ClassifiedAdSentToReview:
         State = ClassifiedAdState.PendingReview;
         break;
 
-      case Events.ClassifiedAdPublished e:
+      case ClassifiedAdPublished e:
         ApprovedBy = new UserId(e.ApprovedBy);
         State = ClassifiedAdState.Active;
         break;

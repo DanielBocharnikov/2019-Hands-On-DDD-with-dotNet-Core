@@ -17,7 +17,10 @@ public static class Events
 
   public record class ClassifiedAdSentToReview(Guid Id);
 
-  public record class ClassifiedAdPublished(Guid Id, Guid ApprovedBy);
+  public record class ClassifiedAdPublished(
+    Guid Id,
+    Guid OwnerId,
+    Guid ApprovedBy);
 
   public record class PictureAddedToClassifiedAd(
     Guid ClassifiedAdId,

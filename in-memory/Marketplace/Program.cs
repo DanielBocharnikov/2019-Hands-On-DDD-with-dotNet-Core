@@ -62,25 +62,25 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
     text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
 
   List<ReadModels.ClassifiedAdDetails> classifiedAdDetails = new();
-
   _ = builder.Services
-    .AddSingleton<IEnumerable<ReadModels.ClassifiedAdDetails>>(classifiedAdDetails);
+    .AddSingleton<IEnumerable<
+      ReadModels.ClassifiedAdDetails>>(classifiedAdDetails);
 
   List<ReadModels.UserDetails> userDetails = new();
-
   _ = builder.Services
     .AddSingleton<IEnumerable<ReadModels.UserDetails>>(userDetails);
 
-  var subscription = new ProjectionManager(
-    esConnection,
-    new ClassifiedAdDetailsProjection(
-      classifiedAdDetails,
-      userId => userDetails
-        .Find(x => x.UserId == userId)?.DisplayName ?? string.Empty),
-    new UserProfileProjection(userDetails));
+  var projectionManager = new ProjectionManager(esConnection,
+    new UserProfileDetailsProjection(userDetails),
+    new ClassifiedAdDetailsProjection(classifiedAdDetails,
+      userId => userDetails.Find(x => x.UserId == userId)?.DisplayName
+        ?? string.Empty),
+    new ClassifiedAdUpcasters(esConnection,
+      userId => userDetails.Find(x => x.UserId == userId)?.PhotoUrl
+        ?? string.Empty));
 
   _ = builder.Services.AddSingleton<IHostedService>(
-    new EventStoreService(esConnection, subscription)
+    new EventStoreService(esConnection, projectionManager)
   );
 }
 
