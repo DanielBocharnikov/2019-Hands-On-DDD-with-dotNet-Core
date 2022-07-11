@@ -7,7 +7,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/in-memory/Marketplace/Marketplace.csproj",
+        "${workspaceFolder}/in-database/Marketplace/Marketplace.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -19,7 +19,7 @@
       "type": "process",
       "args": [
         "publish",
-        "${workspaceFolder}/in-memory/Marketplace/Marketplace.csproj",
+        "${workspaceFolder}/in-database/Marketplace/Marketplace.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -33,7 +33,7 @@
         "watch",
         "run",
         "--project",
-        "${workspaceFolder}/in-memory/Marketplace/Marketplace.csproj"
+        "${workspaceFolder}/in-database/Marketplace/Marketplace.csproj"
       ],
       "problemMatcher": "$msCompile"
     }
