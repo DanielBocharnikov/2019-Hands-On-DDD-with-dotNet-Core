@@ -27,13 +27,13 @@ public static class RequestHandler
     }
   }
 
-  public static IActionResult HandleQuery<TModel>(
-    Func<TModel> query, Serilog.ILogger log
+  public static async Task<IActionResult> HandleQuery<TModel>(
+    Func<Task<TModel>> query, Serilog.ILogger log
   )
   {
     try
     {
-      return new OkObjectResult(query());
+      return new OkObjectResult(await query());
     }
     catch (Exception ex)
     {

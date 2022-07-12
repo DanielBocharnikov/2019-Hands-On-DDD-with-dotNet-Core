@@ -10,7 +10,8 @@ public class EventStoreService : IHostedService
 
   public EventStoreService(
     IEventStoreConnection esConnection,
-    ProjectionManager projectionManager)
+    ProjectionManager projectionManager
+  )
   {
     _esConnection = esConnection;
     _projectionManager = projectionManager;
@@ -19,7 +20,7 @@ public class EventStoreService : IHostedService
   public async Task StartAsync(CancellationToken cancellationToken)
   {
     await _esConnection.ConnectAsync();
-    _projectionManager.Start();
+    await _projectionManager.Start();
   }
 
   public Task StopAsync(CancellationToken cancellationToken)

@@ -63,7 +63,7 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   );
 
   IDocumentStore documentStore = ConfigureRavenDb(
-    builder.Configuration.GetSection("ravenDb")
+    builder.Configuration.GetSection("RavenDb")
   );
 
   Func<IAsyncDocumentSession> getSession =

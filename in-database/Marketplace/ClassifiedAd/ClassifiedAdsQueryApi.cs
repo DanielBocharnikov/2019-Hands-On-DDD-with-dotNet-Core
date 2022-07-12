@@ -1,6 +1,6 @@
 using Marketplace.Infrastructure;
-using Marketplace.Projections;
 using Microsoft.AspNetCore.Mvc;
+using Raven.Client.Documents.Session;
 using Serilog;
 
 namespace Marketplace.ClassifiedAd;
@@ -12,13 +12,13 @@ public class ClassifiedAdsQueryApi : ControllerBase
   private static readonly Serilog.ILogger _log
     = Log.ForContext<ClassifiedAdsQueryApi>();
 
-  private readonly IEnumerable<ReadModels.ClassifiedAdDetails> _items;
+  private readonly IAsyncDocumentSession _session;
 
-  public ClassifiedAdsQueryApi(
-    IEnumerable<ReadModels.ClassifiedAdDetails> items) => _items = items;
+  public ClassifiedAdsQueryApi(IAsyncDocumentSession session)
+    => _session = session;
 
   [HttpGet]
-  public IActionResult Get(
+  public Task<IActionResult> Get(
     [FromQuery] QueryModels.GetPublicClassifiedAd request)
-      => RequestHandler.HandleQuery(() => _items.Query(request), _log);
+      => RequestHandler.HandleQuery(() => _session.Query(request), _log);
 }

@@ -13,25 +13,26 @@ public class UserProfileDetailsProjection
   {
   }
 
-  public override Task Project(object @event)
-    => @event switch
+  public override Task Project(object resolvedEvent)
+    => resolvedEvent switch
     {
       Events.UserRegistered e => Create(
         () => Task.FromResult(
-          new ReadModels.UserDetails(
-            Id: e.UserId.ToString(),
-            DisplayName: e.DisplayName,
-            PhotoUrl: string.Empty
-          )
+          new ReadModels.UserDetails
+          {
+            Id = e.UserId.ToString(),
+            DisplayName = e.DisplayName,
+            PhotoUrl = string.Empty
+          }
         )
       ),
       Events.UserDisplayNameUpdated e => UpdateOne(
         e.UserId,
-        u => u = u with { DisplayName = e.DisplayName }
+        u => u.DisplayName = e.DisplayName
       ),
       Events.ProfilePhotoUploaded e => UpdateOne(
         e.UserId,
-        u => u = u with { PhotoUrl = e.PhotoUrl }
+        u => u.PhotoUrl = e.PhotoUrl
       ),
       _ => Task.CompletedTask
     };

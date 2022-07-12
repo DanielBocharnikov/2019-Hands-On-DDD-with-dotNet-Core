@@ -17,52 +17,50 @@ public class ClassifiedAdDetailsProjection
     Func<Guid, Task<string>> getUserDisplayName
   ) : base(getSession) => _getUserDisplayName = getUserDisplayName;
 
-  public override Task Project(object @event)
-    => @event switch
+  public override Task Project(object resolvedEvent)
+    => resolvedEvent switch
     {
       ClassifiedAdCreated e => Create(
-        async () => new ClassifiedAdDetails(
-          Id: e.Id.ToString(),
-          SellersId: e.OwnerId,
-          SellersDisplayName: await _getUserDisplayName(e.OwnerId),
-          SellersPhotoUrl: string.Empty,
-          Title: string.Empty,
-          Price: decimal.Zero,
-          CurrencyCode: string.Empty,
-          Description: string.Empty,
-          PhotoUrls: Array.Empty<string>()
-        )
+        async () => new ClassifiedAdDetails
+        {
+          Id = e.Id.ToString(),
+          SellersId = e.OwnerId,
+          SellersDisplayName = await _getUserDisplayName(e.OwnerId),
+          SellersPhotoUrl = string.Empty,
+          Title = string.Empty,
+          Price = decimal.Zero,
+          CurrencyCode = string.Empty,
+          Description = string.Empty,
+          PhotoUrls = Array.Empty<string>()
+        }
       ),
       ClassifiedAdTitleChanged e => UpdateOne(
         id: e.Id,
-        update: ad => ad = ad with { Title = e.Title }
+        update: ad => ad.Title = e.Title
       ),
       ClassifiedAdTextUpdated e => UpdateOne(
         id: e.Id,
-        update: ad => ad = ad with { Description = e.Text }
+        update: ad => ad.Description = e.Text
       ),
       ClassifiedAdPriceUpdated e => UpdateOne(
         id: e.Id,
-        update: ad => ad = ad with
+        update: ad =>
         {
-          Price = e.Price,
-          CurrencyCode = e.CurrencyCode
+          ad.Price = e.Price;
+          ad.CurrencyCode = e.CurrencyCode;
         }
       ),
       PictureAddedToClassifiedAd e => UpdateOne(
         id: e.ClassifiedAdId,
-        update: ad => ad = ad with
-        {
-          PhotoUrls = ad.PhotoUrls.Append(e.Url).ToArray()
-        }
+        update: ad => ad.PhotoUrls = ad.PhotoUrls.Append(e.Url).ToArray()
       ),
       UserDisplayNameUpdated e => UpdateWhere(
         where: ad => ad.SellersId == e.UserId,
-        update: ad => ad = ad with { SellersDisplayName = e.DisplayName }
+        update: ad => ad.SellersDisplayName = e.DisplayName
       ),
       V1.ClassifiedAdPublished e => UpdateOne(
         id: e.Id,
-        update: ad => ad = ad with { SellersPhotoUrl = e.SellersPhotoUrl }
+        update: ad => ad.SellersPhotoUrl = e.SellersPhotoUrl
       ),
       _ => Task.CompletedTask
     };

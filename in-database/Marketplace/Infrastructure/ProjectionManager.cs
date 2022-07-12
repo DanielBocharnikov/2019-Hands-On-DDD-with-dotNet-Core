@@ -23,7 +23,7 @@ public class ProjectionManager
     _projections = projections;
   }
 
-  public async void Start()
+  public async Task Start()
   {
     var settings = new CatchUpSubscriptionSettings(
       maxLiveQueueSize: 2000,

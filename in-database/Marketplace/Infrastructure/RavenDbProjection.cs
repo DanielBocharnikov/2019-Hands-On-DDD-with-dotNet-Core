@@ -12,7 +12,7 @@ public abstract class RavenDbProjection<T> : IProjection
   protected RavenDbProjection(Func<IAsyncDocumentSession> getSession)
     => GetSession = getSession;
 
-  public abstract Task Project(object @event);
+  public abstract Task Project(object resolvedEvent);
 
   protected Task Create(Func<Task<T>> model)
     => UsingSession(async session => await session.StoreAsync(await model()));

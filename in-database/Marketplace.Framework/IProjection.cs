@@ -4,6 +4,6 @@ namespace Marketplace.Framework
 {
   public interface IProjection
   {
-    Task Project(object @event);
+    Task Project(object resolvedEvent);
   }
 }
