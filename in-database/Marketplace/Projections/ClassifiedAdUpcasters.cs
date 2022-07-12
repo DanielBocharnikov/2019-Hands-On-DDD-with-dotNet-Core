@@ -9,10 +9,10 @@ namespace Marketplace.Projections;
 public class ClassifiedAdUpcasters : IProjection
 {
   private readonly IEventStoreConnection _eventStoreConnection;
-  private readonly Func<Guid, string> _getUserPhoto;
+  private readonly Func<Guid, Task<string>> _getUserPhoto;
   private const string StreamName = "UpcastedClassifiedAdEvents";
 
-  public ClassifiedAdUpcasters(IEventStoreConnection eventStoreConnection, Func<Guid, string> getUserPhoto)
+  public ClassifiedAdUpcasters(IEventStoreConnection eventStoreConnection, Func<Guid, Task<string>> getUserPhoto)
   {
     _eventStoreConnection = eventStoreConnection;
     _getUserPhoto = getUserPhoto;
@@ -23,7 +23,7 @@ public class ClassifiedAdUpcasters : IProjection
     switch (@event)
     {
       case ClassifiedAdPublished e:
-        string photoUrl = _getUserPhoto(e.OwnerId);
+        string photoUrl = await _getUserPhoto(e.OwnerId);
 
         V1.ClassifiedAdPublished newEvent = new(
           e.Id,

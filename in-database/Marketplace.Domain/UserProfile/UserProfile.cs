@@ -11,12 +11,12 @@ public class UserProfile : AggregateRoot<UserId>
 
   public string PhotoUrl { get; private set; } = string.Empty;
 
-  private UserProfile()
-  {
-  }
-
   public UserProfile(UserId id, FullName fullName, DisplayName displayName)
     => Apply(new Events.UserRegistered(id, fullName, displayName));
+
+  protected UserProfile()
+  {
+  }
 
   public void UpdateFullName(FullName newFullName)
     => Apply(new Events.UserFullNameUpdated(Id, newFullName));

@@ -6,6 +6,9 @@ using Marketplace.Framework;
 using Marketplace.Infrastructure;
 using Marketplace.Projections;
 using Marketplace.UserProfile;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
+using Raven.Client.ServerWide.Operations;
 using Serilog;
 using static System.Reflection.Assembly;
 
@@ -20,22 +23,18 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
   }
 );
 {
-  _ = builder.Host.UseSerilog((_, lc) => lc
-    .MinimumLevel.Debug()
-    .WriteTo.Console());
-
   _ = builder.Services.AddControllers();
   _ = builder.Services.AddEndpointsApiExplorer();
   _ = builder.Services.AddSwaggerGen();
 
-  var credentials = new UserCredentials(
-    builder.Configuration["EventStore:UserName"],
-    builder.Configuration["EventStore:Password"]
-  );
-
   ConnectionSettings connectionSettings = ConnectionSettings
     .Create()
-    .SetDefaultUserCredentials(credentials)
+    .SetDefaultUserCredentials(
+      new UserCredentials(
+        builder.Configuration["EventStore:UserName"],
+        builder.Configuration["EventStore:Password"]
+      )
+    )
     .DisableTls()
     .KeepReconnecting()
     .SetHeartbeatTimeout(TimeSpan.FromMilliseconds(500))
@@ -51,42 +50,84 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(
 
   _ = builder.Services.AddSingleton(esConnection);
   _ = builder.Services.AddSingleton<IAggregateStore>(store);
-
-  _ = builder.Services.AddSingleton(new ClassifiedAdsApplicationService(
-    store, new FixedCurrencyLookup()));
+  _ = builder.Services.AddSingleton(
+    new ClassifiedAdsApplicationService(store, new FixedCurrencyLookup())
+  );
 
   PurgomalumClient purgomalumClient = new();
+  _ = builder.Services.AddSingleton(
+    new UserProfileApplicationService(
+      store,
+      text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()
+    )
+  );
 
-  _ = builder.Services.AddSingleton(new UserProfileApplicationService(
-    store,
-    text => purgomalumClient.CheckForProfanity(text).GetAwaiter().GetResult()));
+  IDocumentStore documentStore = ConfigureRavenDb(
+    builder.Configuration.GetSection("ravenDb")
+  );
 
-  List<ReadModels.ClassifiedAdDetails> classifiedAdDetails = new();
-  _ = builder.Services
-    .AddSingleton<IEnumerable<
-      ReadModels.ClassifiedAdDetails>>(classifiedAdDetails);
+  Func<IAsyncDocumentSession> getSession =
+    () => documentStore.OpenAsyncSession();
+  _ = builder.Services.AddTransient(_ => getSession());
 
-  List<ReadModels.UserDetails> userDetails = new();
-  _ = builder.Services
-    .AddSingleton<IEnumerable<ReadModels.UserDetails>>(userDetails);
-
-  var projectionManager = new ProjectionManager(esConnection,
-    new UserProfileDetailsProjection(userDetails),
-    new ClassifiedAdDetailsProjection(classifiedAdDetails,
-      userId => userDetails.Find(x => x.UserId == userId)?.DisplayName
-        ?? string.Empty),
-    new ClassifiedAdUpcasters(esConnection,
-      userId => userDetails.Find(x => x.UserId == userId)?.PhotoUrl
-        ?? string.Empty));
+  ProjectionManager projectionManager = new(
+    esConnection,
+    new RavenDbCheckpointStore(getSession, "readmodels"),
+    new UserProfileDetailsProjection(getSession),
+    new ClassifiedAdDetailsProjection(
+      getSession,
+      async userId => (await getSession.GetUserDetails(userId)).DisplayName
+    ),
+    new ClassifiedAdUpcasters(
+      esConnection,
+      async userId => (await getSession.GetUserDetails(userId)).PhotoUrl
+    )
+  );
 
   _ = builder.Services.AddSingleton<IHostedService>(
     new EventStoreService(esConnection, projectionManager)
   );
+
+  _ = builder.Host.UseSerilog((_, lc) => lc
+  .MinimumLevel.Debug()
+  .WriteTo.Console());
+}
+
+static IDocumentStore ConfigureRavenDb(
+  IConfigurationSection configurationSection
+)
+{
+  DocumentStore store = new()
+  {
+    Urls = new[]
+    {
+      configurationSection["server"]
+    },
+    Database = configurationSection["database"]
+  };
+
+  _ = store.Initialize();
+
+  Raven.Client.ServerWide.DatabaseRecordWithEtag record = store
+    .Maintenance
+    .Server
+    .Send(new GetDatabaseRecordOperation(store.Database));
+
+  if (record is null)
+  {
+    _ = store
+      .Maintenance
+      .Server
+      .Send(new GetDatabaseRecordOperation(store.Database));
+  }
+
+  return store;
 }
 
 try
 {
   Log.Information("Starting web host");
+
   WebApplication? app = builder.Build();
   {
     if (app.Environment.IsDevelopment())

@@ -6,6 +6,8 @@ namespace Marketplace.Domain.ClassifiedAd;
 
 public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
 {
+  private readonly List<Picture> _pictures = new();
+
   public UserId OwnerId { get; private set; } = UserId.None;
 
   public ClassifiedAdTitle Title { get; private set; } = ClassifiedAdTitle.None;
@@ -31,14 +33,12 @@ public class ClassifiedAd : AggregateRoot<ClassifiedAdId>
     MarkedAsSold = 3
   }
 
-  private readonly List<Picture> _pictures = new();
-
-  private ClassifiedAd()
-  {
-  }
-
   public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
     => Apply(new ClassifiedAdCreated(Id: id, OwnerId: ownerId));
+
+  protected ClassifiedAd()
+  {
+  }
 
   public void SetTitle(ClassifiedAdTitle title)
     => Apply(new ClassifiedAdTitleChanged(Id: Id, Title: title));

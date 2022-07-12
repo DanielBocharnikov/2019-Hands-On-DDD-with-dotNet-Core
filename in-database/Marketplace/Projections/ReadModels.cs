@@ -3,7 +3,7 @@ namespace Marketplace.Projections;
 public static class ReadModels
 {
   public record ClassifiedAdDetails(
-    Guid ClassifiedAdId,
+    string Id,
     Guid SellersId,
     string SellersDisplayName,
     string SellersPhotoUrl,
@@ -14,5 +14,5 @@ public static class ReadModels
     string[] PhotoUrls
   );
 
-  public record UserDetails(Guid UserId, string DisplayName, string PhotoUrl);
+  public record UserDetails(string Id, string DisplayName, string PhotoUrl);
 }
