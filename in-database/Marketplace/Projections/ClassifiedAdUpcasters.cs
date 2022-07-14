@@ -18,9 +18,9 @@ public class ClassifiedAdUpcasters : IProjection
     _getUserPhoto = getUserPhoto;
   }
 
-  public async Task Project(object @event)
+  public async Task Project(object resolvedEvent)
   {
-    switch (@event)
+    switch (resolvedEvent)
     {
       case ClassifiedAdPublished e:
         string photoUrl = await _getUserPhoto(e.OwnerId);
